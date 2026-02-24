@@ -25,6 +25,13 @@ router.get('/register', (req, res) => {
   res.render('register');
 });
 
+// modules/routes.js
+router.get('/users', async (req, res) => {
+  const [err, rows] = await connectDB('SELECT id, username, name, email FROM user');
+  if (err) return res.status(500).send('DB hiba');
+  res.render('users', { users: rows });
+});
+
 
 router.get('/logout', lcontroller.logout);
 
@@ -37,5 +44,7 @@ router.post('/register', function (req, res, next) {
 });
 
 router.post('/notes/save', ncontroller.save);
+router.post('/notes/delete', ncontroller.remove); // fallback for clients that don't send body with DELETE
+router.delete('/notes/delete', ncontroller.remove);
 
 module.exports = router;

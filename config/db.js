@@ -1,35 +1,42 @@
 const mysql = require("mysql");
 const config = require("./config");
 
-//használat:Controlleren belül connectDB(futtatandó sql query, post kérés esetén az adatbázisnak átadott adat).
+// create pool once
+const pool = mysql.createPool(config);
+
+// használat: Controlleren belül connectDB(futtatandó sql query, post kérés esetén az adatbázisnak átadott adat).
 const connectDB = async (query, values) => {
   return new Promise(resolve => {
-    const pool = mysql.createPool(config);
-    try {
-      pool.getConnection((err, connection) => {
-        if (err) {
-          console.error(err.code + ': ' + err.sqlMessage + '\nQUERY: ' + err.sql)
-          connection.release();
-          resolve([1, err])
-        } else {
-          connection.query(query, [values], function (err, result) {
-            if (err) {
-              console.error(err.code + ': ' + err.sqlMessage + '\nQUERY: ' + err.sql)
-              connection.release();
-              resolve([1, err])
-            } else {
-              connection.release();
-              resolve([0, result])
-            }
-          })
+    pool.getConnection((err, connection) => {
+      if (err) {
+        console.error('DB connection error:', err);
+        if (connection && typeof connection.release === 'function') connection.release();
+        return resolve([1, err]);
+      }
 
+      const cb = (err, result) => {
+        if (err) {
+          console.error('DB query error:', err);
+          if (connection && typeof connection.release === 'function') connection.release();
+          return resolve([1, err]);
         }
-      })
-    } catch (err) {
-      console.error(err.code + ': ' + err.sqlMessage + '\nQUERY: ' + err.sql)
-      connection.release();
-      resolve([1, err])
-    }
+        if (connection && typeof connection.release === 'function') connection.release();
+        return resolve([0, result]);
+      };
+
+      try {
+        if (typeof values === 'undefined') {
+          connection.query(query, cb);
+        } else {
+          connection.query(query, values, cb);
+        }
+      } catch (e) {
+        console.error('DB unexpected error:', e);
+        if (connection && typeof connection.release === 'function') connection.release();
+        return resolve([1, e]);
+      }
+    });
   });
 }
+
 module.exports = connectDB;

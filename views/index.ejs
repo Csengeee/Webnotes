@@ -247,10 +247,37 @@
       })
 
       async function saveNote() {
-        const title = document.getElementById("noteTitle").value
-        const content = document.getElementById("noteContent").value
+        const title = document.getElementById("noteTitle").value.trim()
+        // if a rich text editor is applied, make sure its content is pushed into the textarea
+        if (window.tinymce && typeof tinymce.triggerSave === 'function') {
+          tinymce.triggerSave();
+        }
+        let content = document.getElementById("noteContent").value.trim()
+
+        // additional attempt: read from active editor if available
+        if (window.tinymce) {
+          const ed = tinymce.get('noteContent') || tinymce.activeEditor
+          if (ed) {
+            const txt = ed.getContent({ format: 'text' }).trim() || ed.getContent().trim()
+            if (txt) content = txt
+          }
+        }
+        // fallback: look for an iframe inserted by the editor and read its body
+        if (!content) {
+          const iframe = document.querySelector('.tox-edit-area iframe');
+          if (iframe && iframe.contentDocument) {
+            const body = iframe.contentDocument.body;
+            if (body) {
+              const txt = body.innerText.trim() || body.innerHTML.trim();
+              if (txt) content = txt;
+            }
+          }
+        }
+
         const tags = Array.from(document.querySelectorAll(".tag")).map((tag) => tag.textContent.trim().replace("✖", ""))
-        const createdAt = new Date().toLocaleString()
+        const createdAt = new Date().toISOString()
+
+        console.log('saveNote payload', { title, content, tags, createdAt })
 
         if (!title || !content) {
           alert("A cím és a tartalom mezők kitöltése kötelező!")
@@ -258,24 +285,30 @@
         }
 
         const note = { title, content, tags, createdAt }
-        const notes = JSON.stringify([note])
 
         try {
           const response = await fetch("/notes/save", {
             method: "POST",
+            credentials: 'same-origin',
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ notes }),
+            body: JSON.stringify({ notes: [note] }),
           })
-          if (response.ok) {
-            const data = await response.json()
-            renderNotes()
-            closeNoteModal()
-            showToast("Jegyzet sikeresen mentve!")
-          } else {
-            throw new Error("Hiba történt a mentés során.")
+
+          if (!response.ok) {
+            let errMsg = "Hiba történt a mentés során."
+            try {
+              const errData = await response.json()
+              if (errData && errData.message) errMsg = errData.message
+            } catch {}
+            throw new Error(errMsg)
           }
-        } catch (error) {
-          alert(error.message)
+
+          await loadNotes();
+          closeNoteModal();
+          showToast("Jegyzet sikeresen mentve!");
+        } catch (err) {
+          console.error('saveNote error', err)
+          alert(err.message);
         }
       }
 
@@ -283,7 +316,8 @@
         if (confirm("Biztosan törli a jegyzetet?")) {
           try {
             const response = await fetch("/notes/delete", {
-              method: "DELETE",
+              method: "POST",
+              credentials: 'same-origin',
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ id: notes[index].id }),
             })
@@ -300,14 +334,30 @@
         }
       }
 
-      function renderNotes(notes) {
+      function renderNotes(list = notes) {
+        notes = list
         const noteList = document.getElementById("noteList")
         noteList.innerHTML = ""
 
-        if (notes.length === 0) {
+        if (!notes || notes.length === 0) {
           noteList.innerHTML = "<div class='no-notes'>Nincsenek jegyzetek.</div>"
           return
         }
+
+        notes.forEach((n, i) => {
+          const card = document.createElement("div")
+          card.className = "note-card"
+          card.innerHTML = `
+            <h3>${sanitizeInput(n.title)}</h3>
+            <p>${sanitizeInput(n.content)}</p>
+            <div class="tag-row">${(n.tags || []).map(t=>`<span class="tag">${sanitizeInput(t)}</span>`).join('')}</div>
+            <div class="note-actions">
+              <button class="edit-btn" onclick="openNoteModal(${i})" aria-label="Szerkesztés">✎</button>
+              <button class="delete-btn" onclick="deleteNote(${i})" aria-label="Törlés">🗑</button>
+            </div>
+          `
+          noteList.appendChild(card)
+        })
       }
 
       document.getElementById("searchInput").addEventListener("input", function () {
@@ -318,9 +368,10 @@
 
       async function loadNotes() {
         try {
-          const response = await fetch("/notes/list")
+          const response = await fetch("/notes/list", { credentials: 'same-origin' })
           if (response.ok) {
-            notes = await response.json()
+            const result = await response.json()
+            notes = result.notes || []
             renderNotes(notes)
           } else {
             throw new Error("Hiba történt a jegyzetek betöltése során.")
