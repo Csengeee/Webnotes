@@ -5,8 +5,7 @@ const rcontroller = require("../controllers/RegisterController.js")
 const lcontroller = require("../controllers/LoginController.js");
 const ncontroller = require("../controllers/NotesController.js");
 const { requireAuth } = require('./auth');
-const connectDB = require('../config/db');
-
+const { connectDB } = require('../config/db');
 // ######## GET kérések ########
 
 router.get('/', (req, res) => {
