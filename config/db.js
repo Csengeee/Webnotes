@@ -39,4 +39,13 @@ const connectDB = async (query, values) => {
   });
 }
 
-module.exports = connectDB;
+const getConnection = () => {
+  return new Promise((resolve, reject) => {
+    pool.getConnection((err, connection) => {
+      if (err) reject(err);
+      else resolve(connection);
+    });
+  });
+};
+
+module.exports = { connectDB, getConnection };
