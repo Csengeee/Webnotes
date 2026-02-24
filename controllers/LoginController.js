@@ -1,4 +1,4 @@
-const connectDB = require("../config/db")
+const { connectDB } = require("../config/db");
 const bcrypt = require('bcryptjs')
 const sanitizer = require('../modules/inputSanitizer')
 
@@ -15,7 +15,7 @@ const login = async (req, res, next) => {
     if (passwordRaw.length > 72) {
         return res.status(400).json({ message: 'Túl hosszú jelszó' });
     }
-    
+
     const password = passwordRaw; // don't modify password
 
     if (!username || !password) {
