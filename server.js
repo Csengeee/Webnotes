@@ -36,16 +36,15 @@ try {
 }
 
 app.use(session({
-  // Kötelezővé tesszük a SESSION_SECRET meglétét
-  secret: process.env.SESSION_SECRET, 
+  secret: process.env.SESSION_SECRET || 'nagyon_titkos_tartalek_kulcs_123', 
   resave: false,
   saveUninitialized: false,
   store: sessionStore,
   cookie: {
-    httpOnly: true, // Megvédi a cookie-t a kliens oldali scriptektől
-    secure: process.env.NODE_ENV === 'production', // Csak HTTPS-en keresztül küldi el élesben
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    maxAge: 24 * 60 * 60 * 1000 // 1 nap
+    maxAge: 24 * 60 * 60 * 1000 
   }
 }));
 
