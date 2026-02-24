@@ -36,15 +36,16 @@ try {
 }
 
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'change_this_in_production',
+  // Kötelezővé tesszük a SESSION_SECRET meglétét
+  secret: process.env.SESSION_SECRET, 
   resave: false,
   saveUninitialized: false,
   store: sessionStore,
   cookie: {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true, // Megvédi a cookie-t a kliens oldali scriptektől
+    secure: process.env.NODE_ENV === 'production', // Csak HTTPS-en keresztül küldi el élesben
     sameSite: 'lax',
-    maxAge: 24 * 60 * 60 * 1000 // 1 day
+    maxAge: 24 * 60 * 60 * 1000 // 1 nap
   }
 }));
 

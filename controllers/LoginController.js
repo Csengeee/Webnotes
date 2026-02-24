@@ -3,10 +3,19 @@ const bcrypt = require('bcryptjs')
 const sanitizer = require('../modules/inputSanitizer')
 
 const login = async (req, res, next) => {
-    const usernameRaw = (req.body && req.body.username) ? String(req.body.username) : '';
-    const passwordRaw = (req.body && req.body.password) ? String(req.body.password) : '';
+    const { username: usernameRaw, password: passwordRaw } = req.body;
 
-    const username = sanitizer.sanitizeText(usernameRaw, 100);
+    // Ellenőrizzük, hogy mindkét mező ki van-e töltve
+    if (!usernameRaw || !passwordRaw) {
+        return res.status(400).json({ message: 'Felhasználónév és jelszó megadása kötelező' });
+    }
+
+    const username = sanitizer.sanitizeText(String(usernameRaw), 100);
+    // A jelszót nem tisztítjuk, de korlátozzuk a hosszát a DoS támadások ellen
+    if (passwordRaw.length > 72) {
+        return res.status(400).json({ message: 'Túl hosszú jelszó' });
+    }
+    
     const password = passwordRaw; // don't modify password
 
     if (!username || !password) {
