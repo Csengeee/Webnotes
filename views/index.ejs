@@ -149,34 +149,20 @@
       hugerte.init({
         selector: "textarea",
         plugins: [
-          // Core editing features
-          "anchor",
-          "autolink",
-          "charmap",
-          "codesample",
-          "emoticons",
-          "image",
-          "link",
-          "lists",
-          "media",
-          "searchreplace",
-          "table",
-          "visualblocks",
-          "wordcount",
+          "anchor","autolink","charmap","codesample","emoticons","image","link","lists","media","searchreplace","table","visualblocks","wordcount",
         ],
         toolbar: "undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat",
         tinycomments_mode: "embedded",
         toolbar: "language",
         spellchecker_language: "hu",
       })
-    </script>
-    <script>
+
       let notes = []
-      let editingIndex = -1
+      let editingId = null
 
       function sanitizeInput(input) {
         const tempDiv = document.createElement("div")
-        tempDiv.textContent = input
+        tempDiv.textContent = input || ''
         return tempDiv.innerHTML
       }
 
@@ -184,77 +170,76 @@
         const toast = document.getElementById("toast")
         toast.textContent = message
         toast.className = "toast show"
-        setTimeout(() => {
-          toast.className = toast.className.replace("show", "")
-        }, 3000)
+        setTimeout(() => { toast.className = toast.className.replace("show", "") }, 3000)
       }
 
-      function openNoteModal(index = -1) {
+      function openNoteModal(noteId = null) {
         const modal = document.getElementById("noteModal")
         const titleInput = document.getElementById("noteTitle")
         const contentInput = document.getElementById("noteContent")
         const tagContainer = document.getElementById("tagContainer")
         const tagInput = document.getElementById("tagInput")
 
-        if (index !== -1) {
-          editingIndex = index
-          titleInput.value = notes[index].title
-          contentInput.value = notes[index].content
-
-          tagContainer.innerHTML = ""
-          notes[index].tags.forEach((tag) => createTagElement(tag))
+        if (noteId !== null) {
+          const id = Number(noteId)
+          editingId = id
+          const note = notes.find(n => Number(n.id) === id)
+          if (note) {
+            titleInput.value = note.title || ''
+            if (window.tinymce) {
+              const ed = tinymce.get('noteContent') || tinymce.activeEditor
+              if (ed && typeof ed.setContent === 'function') ed.setContent(note.content || '')
+              else contentInput.value = note.content || ''
+            } else {
+              contentInput.value = note.content || ''
+            }
+            tagContainer.innerHTML = ""
+            ;(note.tags || []).forEach((tag) => createTagElement(tag))
+          } else {
+            editingId = null
+            titleInput.value = ''
+            if (window.tinymce) { const ed = tinymce.get('noteContent') || tinymce.activeEditor; if (ed && typeof ed.setContent === 'function') ed.setContent('') }
+            else contentInput.value = ''
+            tagContainer.innerHTML = ''
+          }
         } else {
-          editingIndex = -1
-          titleInput.value = ""
-          contentInput.value = ""
-          tagContainer.innerHTML = ""
-          tagInput.value = ""
+          editingId = null
+          titleInput.value = ''
+          if (window.tinymce) { const ed = tinymce.get('noteContent') || tinymce.activeEditor; if (ed && typeof ed.setContent === 'function') ed.setContent('') }
+          else document.getElementById('noteContent').value = ''
+          tagContainer.innerHTML = ''
+          tagInput.value = ''
         }
 
-        modal.style.display = "block"
+        modal.style.display = 'block'
         titleInput.focus()
       }
 
       function createTagElement(tagText) {
-        const tagContainer = document.getElementById("tagContainer")
-        const tagElement = document.createElement("div")
-        tagElement.classList.add("tag")
-        tagElement.innerHTML = `
-    ${sanitizeInput(tagText)}
-    <span class="tag-delete" onclick="deleteTag(this)" aria-label="Címke törlése">✖</span>
-  `
+        const tagContainer = document.getElementById('tagContainer')
+        const tagElement = document.createElement('div')
+        tagElement.classList.add('tag')
+        tagElement.innerHTML = `${sanitizeInput(tagText)} <span class="tag-delete" onclick="deleteTag(this)" aria-label="Címke törlése">✖</span>`
         tagContainer.appendChild(tagElement)
       }
 
-      function deleteTag(deleteButton) {
-        deleteButton.closest(".tag").remove()
-      }
+      function deleteTag(deleteButton) { deleteButton.closest('.tag').remove() }
 
-      document.getElementById("tagInput").addEventListener("keydown", function (e) {
-        if (e.key === "Enter" || e.key === ",") {
+      document.getElementById('tagInput').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ',') {
           e.preventDefault()
           const tagText = this.value.trim()
           if (tagText) {
-            const existingTags = Array.from(document.querySelectorAll(".tag")).map((tag) => tag.textContent.trim().replace("✖", ""))
-            if (!existingTags.includes(tagText)) {
-              createTagElement(tagText)
-              this.value = ""
-            } else {
-              alert("Ez a címke már létezik!")
-            }
+            const existingTags = Array.from(document.querySelectorAll('.tag')).map(t => t.textContent.trim().replace('✖', ''))
+            if (!existingTags.includes(tagText)) { createTagElement(tagText); this.value = '' } else alert('Ez a címke már létezik!')
           }
         }
       })
 
       async function saveNote() {
-        const title = document.getElementById("noteTitle").value.trim()
-        // if a rich text editor is applied, make sure its content is pushed into the textarea
-        if (window.tinymce && typeof tinymce.triggerSave === 'function') {
-          tinymce.triggerSave();
-        }
-        let content = document.getElementById("noteContent").value.trim()
-
-        // additional attempt: read from active editor if available
+        const title = document.getElementById('noteTitle').value.trim()
+        if (window.tinymce && typeof tinymce.triggerSave === 'function') tinymce.triggerSave()
+        let content = document.getElementById('noteContent').value.trim()
         if (window.tinymce) {
           const ed = tinymce.get('noteContent') || tinymce.activeEditor
           if (ed) {
@@ -262,140 +247,94 @@
             if (txt) content = txt
           }
         }
-        // fallback: look for an iframe inserted by the editor and read its body
         if (!content) {
-          const iframe = document.querySelector('.tox-edit-area iframe');
+          const iframe = document.querySelector('.tox-edit-area iframe')
           if (iframe && iframe.contentDocument) {
-            const body = iframe.contentDocument.body;
+            const body = iframe.contentDocument.body
             if (body) {
-              const txt = body.innerText.trim() || body.innerHTML.trim();
-              if (txt) content = txt;
+              const txt = body.innerText.trim() || body.innerHTML.trim()
+              if (txt) content = txt
             }
           }
         }
 
-        const tags = Array.from(document.querySelectorAll(".tag")).map((tag) => tag.textContent.trim().replace("✖", ""))
-        const createdAt = new Date().toISOString()
-
-        console.log('saveNote payload', { title, content, tags, createdAt })
-
-        if (!title || !content) {
-          alert("A cím és a tartalom mezők kitöltése kötelező!")
-          return
+        const tags = Array.from(document.querySelectorAll('.tag')).map((tag) => tag.textContent.trim().replace('✖', ''))
+        let note
+        if (editingId !== null) {
+          const original = notes.find(n => Number(n.id) === editingId)
+          note = { id: editingId, title, content, tags, createdAt: original ? original.createdAt : new Date().toISOString(), updatedAt: new Date().toISOString() }
+        } else {
+          note = { title, content, tags, createdAt: new Date().toISOString() }
         }
 
-        const note = { title, content, tags, createdAt }
+        console.log('saveNote payload', note)
+        if (!note.title || !note.content) { alert('A cím és a tartalom mezők kitöltése kötelező!'); return }
 
         try {
-          const response = await fetch("/notes/save", {
-            method: "POST",
-            credentials: 'same-origin',
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ notes: [note] }),
-          })
+          const response = await fetch('/notes/save', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ notes: [note] }) })
+          const respData = await response.json().catch(() => null)
+          console.log('save response summary:', respData && respData.notes ? respData.notes.map(n => ({ id: n.id, len: n.content ? n.content.length : 0 })) : respData)
+          if (!response.ok) { let errMsg = 'Hiba történt a mentés során.'; if (respData && respData.message) errMsg = respData.message; throw new Error(errMsg) }
 
-          if (!response.ok) {
-            let errMsg = "Hiba történt a mentés során."
-            try {
-              const errData = await response.json()
-              if (errData && errData.message) errMsg = errData.message
-            } catch {}
-            throw new Error(errMsg)
-          }
+          if (respData && Array.isArray(respData.notes)) { notes = respData.notes; renderNotes(notes) } else { await loadNotes() }
 
-          await loadNotes();
-          closeNoteModal();
-          showToast("Jegyzet sikeresen mentve!");
-        } catch (err) {
-          console.error('saveNote error', err)
-          alert(err.message);
-        }
+          editingId = null
+          closeNoteModal()
+          showToast('Jegyzet sikeresen mentve!')
+        } catch (err) { console.error('saveNote error', err); alert(err.message) }
       }
 
-      async function deleteNote(index) {
-        if (confirm("Biztosan törli a jegyzetet?")) {
-          try {
-            const response = await fetch("/notes/delete", {
-              method: "POST",
-              credentials: 'same-origin',
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ id: notes[index].id }),
-            })
-            if (response.ok) {
-              notes.splice(index, 1)
-              renderNotes()
-              showToast("Jegyzet sikeresen törölve!")
-            } else {
-              throw new Error("Hiba történt a törlés során.")
-            }
-          } catch (error) {
-            alert(error.message)
-          }
-        }
+      async function deleteNoteById(noteId) {
+        if (!confirm('Biztosan törli a jegyzetet?')) return
+        try {
+          const response = await fetch('/notes/delete', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: noteId }) })
+          if (response.ok) {
+            const idx = notes.findIndex(n => Number(n.id) === Number(noteId)); if (idx !== -1) notes.splice(idx, 1)
+            renderNotes()
+            showToast('Jegyzet sikeresen törölve!')
+          } else throw new Error('Hiba történt a törlés során.')
+        } catch (error) { alert(error.message) }
       }
 
       function renderNotes(list = notes) {
         notes = list
-        const noteList = document.getElementById("noteList")
-        noteList.innerHTML = ""
-
-        if (!notes || notes.length === 0) {
-          noteList.innerHTML = "<div class='no-notes'>Nincsenek jegyzetek.</div>"
-          return
-        }
-
-        notes.forEach((n, i) => {
-          const card = document.createElement("div")
-          card.className = "note-card"
+        const noteList = document.getElementById('noteList')
+        noteList.innerHTML = ''
+        if (!notes || notes.length === 0) { noteList.innerHTML = "<div class='no-notes'>Nincsenek jegyzetek.</div>"; return }
+        notes.forEach((n) => {
+          const card = document.createElement('div')
+          card.className = 'note-card'
           card.innerHTML = `
             <h3>${sanitizeInput(n.title)}</h3>
             <p>${sanitizeInput(n.content)}</p>
             <div class="tag-row">${(n.tags || []).map(t=>`<span class="tag">${sanitizeInput(t)}</span>`).join('')}</div>
             <div class="note-actions">
-              <button class="edit-btn" onclick="openNoteModal(${i})" aria-label="Szerkesztés">✎</button>
-              <button class="delete-btn" onclick="deleteNote(${i})" aria-label="Törlés">🗑</button>
+              <button class="edit-btn" onclick="openNoteModal(${n.id})" aria-label="Szerkesztés">✎</button>
+              <button class="delete-btn" onclick="deleteNoteById(${n.id})" aria-label="Törlés">🗑</button>
             </div>
           `
           noteList.appendChild(card)
         })
       }
 
-      document.getElementById("searchInput").addEventListener("input", function () {
+      document.getElementById('searchInput').addEventListener('input', function () {
         const searchTerm = this.value.toLowerCase()
-        const filteredNotes = notes.filter((note) => note.title.toLowerCase().includes(searchTerm) || note.content.toLowerCase().includes(searchTerm) || note.tags.some((tag) => tag.toLowerCase().includes(searchTerm)))
+        const filteredNotes = notes.filter((note) => (note.title || '').toLowerCase().includes(searchTerm) || (note.content || '').toLowerCase().includes(searchTerm) || (note.tags || []).some((tag) => tag.toLowerCase().includes(searchTerm)))
         renderNotes(filteredNotes)
       })
 
       async function loadNotes() {
         try {
-          const response = await fetch("/notes/list", { credentials: 'same-origin' })
-          if (response.ok) {
-            const result = await response.json()
-            notes = result.notes || []
-            renderNotes(notes)
-          } else {
-            throw new Error("Hiba történt a jegyzetek betöltése során.")
-          }
-        } catch (error) {
-          alert(error.message)
-        }
+          const response = await fetch('/notes/list', { credentials: 'same-origin' })
+          if (response.ok) { const result = await response.json(); notes = result.notes || []; renderNotes(notes) } else throw new Error('Hiba történt a jegyzetek betöltése során.')
+        } catch (error) { alert(error.message) }
       }
 
-      function closeNoteModal() {
-        const modal = document.getElementById("noteModal")
-        modal.style.display = "none"
-      }
+      function closeNoteModal() { const modal = document.getElementById('noteModal'); modal.style.display = 'none'; editingId = null }
 
-      window.onclick = function (event) {
-        const modal = document.getElementById("noteModal")
-        if (event.target === modal) {
-          closeNoteModal()
-        }
-      }
+      window.onclick = function (event) { const modal = document.getElementById('noteModal'); if (event.target === modal) closeNoteModal() }
 
-      document.addEventListener("DOMContentLoaded", function () {
-        loadNotes()
-      })
+      document.addEventListener('DOMContentLoaded', function () { loadNotes() })
     </script>
   </body>
 </html>

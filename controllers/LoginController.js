@@ -1,9 +1,13 @@
-const { password } = require("../config/config");
 const connectDB = require("../config/db")
 const bcrypt = require('bcryptjs')
+const sanitizer = require('../modules/inputSanitizer')
 
 const login = async (req, res, next) => {
-    const { username, password } = req.body;
+    const usernameRaw = (req.body && req.body.username) ? String(req.body.username) : '';
+    const passwordRaw = (req.body && req.body.password) ? String(req.body.password) : '';
+
+    const username = sanitizer.sanitizeText(usernameRaw, 100);
+    const password = passwordRaw; // don't modify password
 
     if (!username || !password) {
         return res.sendStatus(400);
@@ -39,12 +43,28 @@ const login = async (req, res, next) => {
 };
 
 const logout = (req, res) => {
-    req.session.destroy(err => {
-      if (err) {
-        return res.status(500).json({ message: 'Nem sikerült kijelentkezni' });
-      }
-      res.redirect('/login');
-    });
+        try {
+            console.log('Logout requested. sessionID:', req.sessionID, 'hasSession:', !!req.session, 'storePresent:', !!req.sessionStore);
+            if (!req.session) {
+                res.clearCookie('connect.sid');
+                return res.redirect('/login');
+            }
+
+            req.session.destroy(err => {
+                if (err) {
+                    console.error('Session destroy error:', err);
+                    // attempt to clear cookie anyway
+                    res.clearCookie('connect.sid');
+                    return res.status(500).json({ message: 'Nem sikerült kijelentkezni' });
+                }
+                res.clearCookie('connect.sid');
+                return res.redirect('/login');
+            });
+        } catch (e) {
+            console.error('Logout unexpected error:', e);
+            try { res.clearCookie('connect.sid'); } catch (err) {}
+            return res.status(500).json({ message: 'Nem sikerült kijelentkezni' });
+        }
 };
 
 module.exports = { 

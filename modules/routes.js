@@ -4,6 +4,8 @@ const router = express.Router();
 const rcontroller = require("../controllers/RegisterController.js")
 const lcontroller = require("../controllers/LoginController.js");
 const ncontroller = require("../controllers/NotesController.js");
+const { requireAuth } = require('./auth');
+const connectDB = require('../config/db');
 
 // ######## GET kérések ########
 
@@ -17,16 +19,18 @@ router.get('/', (req, res) => {
   }
 });
 
-router.get('/notes/list', ncontroller.list);
+router.get('/notes/list', requireAuth, ncontroller.list);
 
-router.get('/login', lcontroller.login);
+router.get('/login', (req, res) => {
+  res.render('login');
+});
 
 router.get('/register', (req, res) => {
   res.render('register');
 });
 
 // modules/routes.js
-router.get('/users', async (req, res) => {
+router.get('/users', requireAuth, async (req, res) => {
   const [err, rows] = await connectDB('SELECT id, username, name, email FROM user');
   if (err) return res.status(500).send('DB hiba');
   res.render('users', { users: rows });
@@ -43,8 +47,8 @@ router.post('/register', function (req, res, next) {
   rcontroller(req, res, next)
 });
 
-router.post('/notes/save', ncontroller.save);
-router.post('/notes/delete', ncontroller.remove); // fallback for clients that don't send body with DELETE
-router.delete('/notes/delete', ncontroller.remove);
+router.post('/notes/save', requireAuth, ncontroller.save);
+router.post('/notes/delete', requireAuth, ncontroller.remove); // fallback for clients that don't send body with DELETE
+router.delete('/notes/delete', requireAuth, ncontroller.remove);
 
 module.exports = router;
