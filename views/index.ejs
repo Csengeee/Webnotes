@@ -7,85 +7,21 @@
     <link rel="stylesheet" href="/css/index.css" />
     <link rel="stylesheet" href="/css/notes.css" />
     <title>WebNotes</title>
-    <!-- Accessibility Enhancements -->
     <style>
-      /* Responsive Design Enhancements */
+      /* Responsive és Toast stílusok változatlanok */
       @media (max-width: 600px) {
-        .column_2 {
-          width: 100%;
-        }
-        .plusBTN {
-          position: fixed;
-          bottom: 20px;
-          right: 20px;
-        }
+        .column_2 { width: 100%; }
+        .plusBTN { position: fixed; bottom: 20px; right: 20px; }
       }
-      /* Toast Notification Styles */
       .toast {
-        visibility: hidden;
-        min-width: 250px;
-        margin-left: -125px;
-        background-color: #333;
-        color: #fff;
-        text-align: center;
-        border-radius: 2px;
-        padding: 16px;
-        position: fixed;
-        z-index: 1;
-        left: 50%;
-        bottom: 30px;
-        font-size: 17px;
+        visibility: hidden; min-width: 250px; margin-left: -125px;
+        background-color: #333; color: #fff; text-align: center;
+        border-radius: 5px; padding: 16px; position: fixed;
+        z-index: 999; left: 50%; bottom: 30px; font-size: 17px;
       }
-
-      .toast.show {
-        visibility: visible;
-        -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
-        animation: fadein 0.5s, fadeout 0.5s 2.5s;
-      }
-
-      @-webkit-keyframes fadein {
-        from {
-          bottom: 0;
-          opacity: 0;
-        }
-        to {
-          bottom: 30px;
-          opacity: 1;
-        }
-      }
-
-      @keyframes fadein {
-        from {
-          bottom: 0;
-          opacity: 0;
-        }
-        to {
-          bottom: 30px;
-          opacity: 1;
-        }
-      }
-
-      @-webkit-keyframes fadeout {
-        from {
-          bottom: 30px;
-          opacity: 1;
-        }
-        to {
-          bottom: 60px;
-          opacity: 0;
-        }
-      }
-
-      @keyframes fadeout {
-        from {
-          bottom: 30px;
-          opacity: 1;
-        }
-        to {
-          bottom: 60px;
-          opacity: 0;
-        }
-      }
+      .toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+      @keyframes fadein { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
+      @keyframes fadeout { from { bottom: 30px; opacity: 1; } to { bottom: 60px; opacity: 0; } }
     </style>
   </head>
   <body>
@@ -119,21 +55,17 @@
           <div id="noteList"></div>
         </div>
         <div class="column_3">
-          <button class="plusBTN" onclick="openNoteModal()" aria-label="Új jegyzet hozzáadása">+</button>
+          <button id="addNoteBtn" class="plusBTN" onclick="openNoteModal()" aria-label="Új jegyzet hozzáadása">+</button>
         </div>
       </div>
     </div>
 
-    <!-- Note Modal -->
     <div id="noteModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="noteModalLabel">
       <div class="modal-content">
         <input type="text" id="noteTitle" placeholder="Cím" aria-label="Jegyzet címe" />
         <textarea id="noteContent" placeholder="Tartalom" rows="5" aria-label="Jegyzet tartalma"></textarea>
-
-        <!-- Tag Input Section -->
         <div class="tag-container" id="tagContainer"></div>
-        <input type="text" id="tagInput" class="tag-input" placeholder="Add hozzá a címkéket (vesszővel elválasztva)" aria-label="Címkék hozzáadása" />
-
+        <input type="text" id="tagInput" class="tag-input" placeholder="Címkék (vessző vagy Enter)" aria-label="Címkék hozzáadása" />
         <div class="modal-buttons">
           <button class="modal-save" onclick="saveNote()">Mentés</button>
           <button class="modal-cancel" onclick="closeNoteModal()">Mégse</button>
@@ -141,200 +73,174 @@
       </div>
     </div>
 
-    <!-- Toast Notification -->
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <!-- Place the first <script> tag in your HTML's <head> -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hugerte@1.0.4/hugerte.min.js"></script>
     <script>
+      let notes = [];
+      let editingId = null;
+
       hugerte.init({
-        selector: "textarea",
-        plugins: [
-          "anchor","autolink","charmap","codesample","emoticons","image","link","lists","media","searchreplace","table","visualblocks","wordcount",
-        ],
-        toolbar: "undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat",
-        tinycomments_mode: "embedded",
-        toolbar: "language",
-        spellchecker_language: "hu",
-      })
-
-      let notes = []
-      let editingId = null
-
-      function sanitizeInput(input) {
-        const tempDiv = document.createElement("div")
-        tempDiv.textContent = input || ''
-        return tempDiv.innerHTML
-      }
+        selector: "#noteContent",
+        plugins: ["lists", "link", "image", "table", "wordcount"],
+        toolbar: "undo redo | bold italic | alignleft aligncenter alignright | bullist numlist",
+        setup: function (editor) { editor.on('change', function () { editor.save(); }); }
+      });
 
       function showToast(message) {
-        const toast = document.getElementById("toast")
-        toast.textContent = message
-        toast.className = "toast show"
-        setTimeout(() => { toast.className = toast.className.replace("show", "") }, 3000)
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.className = "toast show";
+        setTimeout(() => { toast.className = "toast"; }, 3000);
       }
 
       function openNoteModal(noteId = null) {
-        const modal = document.getElementById("noteModal")
-        const titleInput = document.getElementById("noteTitle")
-        const contentInput = document.getElementById("noteContent")
-        const tagContainer = document.getElementById("tagContainer")
-        const tagInput = document.getElementById("tagInput")
+        const modal = document.getElementById("noteModal");
+        const titleInput = document.getElementById("noteTitle");
+        const tagContainer = document.getElementById("tagContainer");
+        const tagInput = document.getElementById("tagInput");
+        
+        tagContainer.innerHTML = "";
+        tagInput.value = "";
 
         if (noteId !== null) {
-          const id = Number(noteId)
-          editingId = id
-          const note = notes.find(n => Number(n.id) === id)
+          editingId = Number(noteId);
+          const note = notes.find(n => Number(n.id) === editingId);
           if (note) {
-            titleInput.value = note.title || ''
-            if (window.tinymce) {
-              const ed = tinymce.get('noteContent') || tinymce.activeEditor
-              if (ed && typeof ed.setContent === 'function') ed.setContent(note.content || '')
-              else contentInput.value = note.content || ''
-            } else {
-              contentInput.value = note.content || ''
-            }
-            tagContainer.innerHTML = ""
-            ;(note.tags || []).forEach((tag) => createTagElement(tag))
-          } else {
-            editingId = null
-            titleInput.value = ''
-            if (window.tinymce) { const ed = tinymce.get('noteContent') || tinymce.activeEditor; if (ed && typeof ed.setContent === 'function') ed.setContent('') }
-            else contentInput.value = ''
-            tagContainer.innerHTML = ''
+            titleInput.value = note.title;
+            hugerte.get('noteContent').setContent(note.content || "");
+            (note.tags || []).forEach(tag => createTagElement(tag));
           }
         } else {
-          editingId = null
-          titleInput.value = ''
-          if (window.tinymce) { const ed = tinymce.get('noteContent') || tinymce.activeEditor; if (ed && typeof ed.setContent === 'function') ed.setContent('') }
-          else document.getElementById('noteContent').value = ''
-          tagContainer.innerHTML = ''
-          tagInput.value = ''
+          editingId = null;
+          titleInput.value = "";
+          hugerte.get('noteContent').setContent("");
         }
 
-        modal.style.display = 'block'
-        titleInput.focus()
+        modal.style.display = 'block';
+        titleInput.focus();
+      }
+
+      function closeNoteModal() {
+        document.getElementById('noteModal').style.display = 'none';
+        document.getElementById('addNoteBtn').focus();
+        editingId = null;
       }
 
       function createTagElement(tagText) {
-        const tagContainer = document.getElementById('tagContainer')
-        const tagElement = document.createElement('div')
-        tagElement.classList.add('tag')
-        tagElement.innerHTML = `${sanitizeInput(tagText)} <span class="tag-delete" onclick="deleteTag(this)" aria-label="Címke törlése">✖</span>`
-        tagContainer.appendChild(tagElement)
+        const tagContainer = document.getElementById('tagContainer');
+        const tagElement = document.createElement('div');
+        tagElement.classList.add('tag');
+        tagElement.innerHTML = `${DOMPurify.sanitize(tagText)} <span class="tag-delete" onclick="this.parentElement.remove()" aria-label="Címke törlése">✖</span>`;
+        tagContainer.appendChild(tagElement);
       }
-
-      function deleteTag(deleteButton) { deleteButton.closest('.tag').remove() }
 
       document.getElementById('tagInput').addEventListener('keydown', function (e) {
         if (e.key === 'Enter' || e.key === ',') {
-          e.preventDefault()
-          const tagText = this.value.trim()
+          e.preventDefault();
+          const tagText = this.value.trim().replace(',', '');
           if (tagText) {
-            const existingTags = Array.from(document.querySelectorAll('.tag')).map(t => t.textContent.trim().replace('✖', ''))
-            if (!existingTags.includes(tagText)) { createTagElement(tagText); this.value = '' } else alert('Ez a címke már létezik!')
-          }
-        }
-      })
-
-      async function saveNote() {
-        const title = document.getElementById('noteTitle').value.trim()
-        if (window.tinymce && typeof tinymce.triggerSave === 'function') tinymce.triggerSave()
-        let content = document.getElementById('noteContent').value.trim()
-        if (window.tinymce) {
-          const ed = tinymce.get('noteContent') || tinymce.activeEditor
-          if (ed) {
-            const txt = ed.getContent({ format: 'text' }).trim() || ed.getContent().trim()
-            if (txt) content = txt
-          }
-        }
-        if (!content) {
-          const iframe = document.querySelector('.tox-edit-area iframe')
-          if (iframe && iframe.contentDocument) {
-            const body = iframe.contentDocument.body
-            if (body) {
-              const txt = body.innerText.trim() || body.innerHTML.trim()
-              if (txt) content = txt
+            const existing = Array.from(document.querySelectorAll('.tag')).map(t => t.textContent.trim().replace('✖', '').trim());
+            if (!existing.includes(tagText)) {
+              createTagElement(tagText);
+              this.value = '';
+            } else {
+              showToast('Ez a címke már létezik!');
             }
           }
         }
+      });
 
-        const tags = Array.from(document.querySelectorAll('.tag')).map((tag) => tag.textContent.trim().replace('✖', ''))
-        let note
-        if (editingId !== null) {
-          const original = notes.find(n => Number(n.id) === editingId)
-          note = { id: editingId, title, content, tags, createdAt: original ? original.createdAt : new Date().toISOString(), updatedAt: new Date().toISOString() }
-        } else {
-          note = { title, content, tags, createdAt: new Date().toISOString() }
+      async function saveNote() {
+        const title = document.getElementById('noteTitle').value.trim();
+        const content = hugerte.get('noteContent').getContent().trim();
+        const tags = Array.from(document.querySelectorAll('.tag')).map(t => t.textContent.trim().replace('✖', '').trim());
+
+        if (!title || !content) {
+          showToast('A cím és a tartalom kitöltése kötelező!');
+          return;
         }
 
-        console.log('saveNote payload', note)
-        if (!note.title || !note.content) { alert('A cím és a tartalom mezők kitöltése kötelező!'); return }
-
+        const note = { id: editingId, title, content, tags };
+        
         try {
-          const response = await fetch('/notes/save', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ notes: [note] }) })
-          const respData = await response.json().catch(() => null)
-          console.log('save response summary:', respData && respData.notes ? respData.notes.map(n => ({ id: n.id, len: n.content ? n.content.length : 0 })) : respData)
-          if (!response.ok) { let errMsg = 'Hiba történt a mentés során.'; if (respData && respData.message) errMsg = respData.message; throw new Error(errMsg) }
+          const response = await fetch('/notes/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ notes: [note] })
+          });
 
-          if (respData && Array.isArray(respData.notes)) { notes = respData.notes; renderNotes(notes) } else { await loadNotes() }
-
-          editingId = null
-          closeNoteModal()
-          showToast('Jegyzet sikeresen mentve!')
-        } catch (err) { console.error('saveNote error', err); alert(err.message) }
-      }
-
-      async function deleteNoteById(noteId) {
-        if (!confirm('Biztosan törli a jegyzetet?')) return
-        try {
-          const response = await fetch('/notes/delete', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: noteId }) })
-          if (response.ok) {
-            const idx = notes.findIndex(n => Number(n.id) === Number(noteId)); if (idx !== -1) notes.splice(idx, 1)
-            renderNotes()
-            showToast('Jegyzet sikeresen törölve!')
-          } else throw new Error('Hiba történt a törlés során.')
-        } catch (error) { alert(error.message) }
+          if (!response.ok) throw new Error('Hiba a mentés során');
+          
+          const respData = await response.json();
+          notes = respData.notes;
+          renderNotes();
+          closeNoteModal();
+          showToast('Sikeres mentés!');
+        } catch (err) {
+          showToast(err.message);
+        }
       }
 
       function renderNotes(list = notes) {
-        notes = list
-        const noteList = document.getElementById('noteList')
-        noteList.innerHTML = ''
-        if (!notes || notes.length === 0) { noteList.innerHTML = "<div class='no-notes'>Nincsenek jegyzetek.</div>"; return }
-        notes.forEach((n) => {
-          const card = document.createElement('div')
-          card.className = 'note-card'
+        const noteList = document.getElementById('noteList');
+        noteList.innerHTML = list.length ? '' : '<div class="no-notes">Nincsenek jegyzetek.</div>';
+        
+        list.forEach(n => {
+          const card = document.createElement('div');
+          card.className = 'note-card';
+          // DOMPurify használata az XSS ellen, hogy a formázások megmaradjanak
           card.innerHTML = `
-            <h3>${sanitizeInput(n.title)}</h3>
-            <p>${sanitizeInput(n.content)}</p>
-            <div class="tag-row">${(n.tags || []).map(t=>`<span class="tag">${sanitizeInput(t)}</span>`).join('')}</div>
+            <h3>${DOMPurify.sanitize(n.title)}</h3>
+            <div class="note-body">${DOMPurify.sanitize(n.content)}</div>
+            <div class="tag-row">${(n.tags || []).map(t => `<span class="tag">${DOMPurify.sanitize(t)}</span>`).join('')}</div>
             <div class="note-actions">
-              <button class="edit-btn" onclick="openNoteModal(${n.id})" aria-label="Szerkesztés">✎</button>
-              <button class="delete-btn" onclick="deleteNoteById(${n.id})" aria-label="Törlés">🗑</button>
+              <button class="edit-btn" onclick="openNoteModal(${n.id})">✎</button>
+              <button class="delete-btn" onclick="deleteNoteById(${n.id})">🗑</button>
             </div>
-          `
-          noteList.appendChild(card)
-        })
+          `;
+          noteList.appendChild(card);
+        });
       }
 
-      document.getElementById('searchInput').addEventListener('input', function () {
-        const searchTerm = this.value.toLowerCase()
-        const filteredNotes = notes.filter((note) => (note.title || '').toLowerCase().includes(searchTerm) || (note.content || '').toLowerCase().includes(searchTerm) || (note.tags || []).some((tag) => tag.toLowerCase().includes(searchTerm)))
-        renderNotes(filteredNotes)
-      })
+      async function deleteNoteById(id) {
+        if (!confirm('Biztosan törlöd?')) return;
+        try {
+          const res = await fetch('/notes/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id })
+          });
+          if (res.ok) {
+            notes = notes.filter(n => n.id !== id);
+            renderNotes();
+            showToast('Törölve!');
+          }
+        } catch (err) { showToast('Hiba a törlésnél'); }
+      }
 
       async function loadNotes() {
         try {
-          const response = await fetch('/notes/list', { credentials: 'same-origin' })
-          if (response.ok) { const result = await response.json(); notes = result.notes || []; renderNotes(notes) } else throw new Error('Hiba történt a jegyzetek betöltése során.')
-        } catch (error) { alert(error.message) }
+          const res = await fetch('/notes/list');
+          const data = await res.json();
+          notes = data.notes || [];
+          renderNotes();
+        } catch (err) { console.error(err); }
       }
 
-      function closeNoteModal() { const modal = document.getElementById('noteModal'); modal.style.display = 'none'; editingId = null }
+      document.getElementById('searchInput').addEventListener('input', function() {
+        const val = this.value.toLowerCase();
+        const filtered = notes.filter(n => 
+          n.title.toLowerCase().includes(val) || 
+          n.content.toLowerCase().includes(val) ||
+          n.tags.some(t => t.toLowerCase().includes(val))
+        );
+        renderNotes(filtered);
+      });
 
-      window.onclick = function (event) { const modal = document.getElementById('noteModal'); if (event.target === modal) closeNoteModal() }
-
-      document.addEventListener('DOMContentLoaded', function () { loadNotes() })
+      document.addEventListener('DOMContentLoaded', loadNotes);
+      window.onclick = (e) => { if (e.target == document.getElementById('noteModal')) closeNoteModal(); };
     </script>
   </body>
 </html>
