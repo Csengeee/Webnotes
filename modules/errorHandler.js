@@ -1,24 +1,23 @@
-const logger = require('./logger')
+// modules/errorHandler.js
+const logger = require('./logger');
 
 function errorHandler(err, req, res, next) {
-  try {
-    logger.error('Unhandled error:', err && err.stack ? err.stack : err)
-  } catch (e) {
-    console.error('Logger failed', e)
-  }
+    // Részletes hiba naplózása a szerver oldalon
+    logger.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}\nStack: ${err.stack}`);
 
-  const status = err && err.status ? err.status : 500
-  if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('application/json') !== -1)) {
-    return res.status(status).json({ status: 'error', message: err && err.message ? err.message : 'Server error' })
-  }
+    const status = err.status || 500;
 
-  res.status(status)
-  try {
-    // try render an error page if available
-    return res.render && typeof res.render === 'function' ? res.render('500', { error: err }) : res.send('Server error')
-  } catch (e) {
-    return res.send('Server error')
-  }
+    // Ha API kérésről van szó, JSON választ adunk
+    if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('application/json') !== -1)) {
+        return res.status(status).json({ 
+            status: 'error', 
+            message: process.env.NODE_ENV === 'production' ? 'Szerver hiba történt' : err.message 
+        });
+    }
+
+    // Egyébként rendereljük az 500-as oldalt
+    res.status(status);
+    res.render('500', { error: process.env.NODE_ENV === 'production' ? {} : err });
 }
 
-module.exports = errorHandler
+module.exports = errorHandler;

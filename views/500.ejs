@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/main.css">
+    <title>Hiba történt - WebNotes</title>
+    <style>
+        .error-container {
+            text-align: center;
+            padding: 50px;
+            background-color: rgba(255, 255, 255, 0.13);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            margin-top: 100px;
+        }
+        .error-code { font-size: 72px; font-weight: bold; color: #f95656; }
+        .error-message { font-size: 24px; margin-bottom: 30px; }
+        .back-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background: linear-gradient(to right, #1845ad, #23a2f6);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="background">
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+    <div class="header" style="position: relative; top: 20px;">
+        <div class="headerTitle">WebNotes</div>
+    </div>
+    <div class="error-container">
+        <div class="error-code">500</div>
+        <div class="error-message">Hoppá! Valami hiba történt a szerverünkön.</div>
+        <p>Már dolgozunk a hiba kijavításán. Kérjük, próbáld meg később.</p>
+        <br>
+        <a href="/" class="back-link">Vissza a főoldalra</a>
+    </div>
+</body>
+</html>
