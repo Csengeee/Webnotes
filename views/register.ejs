@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/registration.css" />
+  <title>WebNotes Regisztráció</title>
+</head>
+
+<body>
+  <div class="background">
+    <div class="shape"></div>
+    <div class="shape"></div>
+  </div>
+  <form method="post" action="/register">
+    <h3>Regisztrálj</h3>
+
+    <div class="row">
+      <div class="column">
+        <% if (typeof(vezeteknev) != "undefined") { %>
+        <label for="vezeteknev">Vezetéknév</label>
+        <input class="passerror" type="text" placeholder="Vezetéknév" id="vezeteknev" name="vezeteknev" />
+        <h5 class="alert">Kötelező mező</h5>
+        <% } %>
+        <% if (typeof(vezeteknev) == "undefined") { %>
+        <label for="vezeteknev">Vezetéknév</label>
+        <input type="text" placeholder="Vezetéknév" id="vezeteknev" name="vezeteknev"
+          value="<%= typeof(vezeteknev_val) != 'undefined' ? vezeteknev_val: '' %>" />
+        <% } %>
+
+
+        <% if (typeof(username) != "undefined") { %>
+        <label for="username">Felhasználónév</label>
+        <input class="passerror" type="text" placeholder="Felhasználónév" id="username" name="username"
+          value="<%= typeof(username) != 'undefined' ? username: '' %>" />
+        <h5 class="alert">A felhasználónév már foglalt</h5>
+        <% } %>
+        <% if (typeof(username) == "undefined") { %>
+        <label for="username">Felhasználónév</label>
+        <input type="text" placeholder="Felhasználónév" id="username" name="username"
+          value="<%= typeof(username_val) != 'undefined' ? username_val: '' %>" />
+        <% } %>
+
+
+        <% if (typeof(password) != "undefined") { %>
+        <label for="create_password">Jelszó</label>
+        <input class="passerror" type="password" placeholder="Jelszó" id="create_password" name="create_password" />
+        <h5 class="alert">A jelszónak ......</h5>
+        <% } %>
+        <% if (typeof(password) == "undefined") { %>
+        <label for="create_password">Jelszó</label>
+        <input type="password" placeholder="Jelszó" id="create_password" name="create_password" />
+        <% } %>
+
+
+      </div>
+
+      <div class="column">
+        <% if (typeof(keresztnev) != "undefined") { %>
+        <label for="keresztnev">Keresztnév</label>
+        <input class="passerror" type="text" placeholder="Keresztnév" id="keresztnev" name="keresztnev" />
+        <h5 class="alert">Kötelező mező</h5>
+        <% } %>
+        <% if (typeof(keresztnev) == "undefined") { %>
+        <label for="keresztnev">Keresztnév</label>
+        <input type="text" placeholder="Keresztnév" id="keresztnev" name="keresztnev"
+          value="<%= typeof(keresztnev_val) != 'undefined' ? keresztnev_val:'' %>" />
+        <% } %>
+
+
+        <% if (typeof(email) != "undefined") { %>
+        <label for="email">E-mail cím</label>
+        <input class="passerror" type="email" placeholder="E-mail cím" id="email" name="email"
+          value="<%= typeof(email) != 'undefined' ? email:'' %>" />
+        <h5 class="alert">Ezt az e-mail címet már használják</h5>
+        <% } %>
+        <% if (typeof(email) == "undefined") { %>
+        <label for="email">E-mail cím</label>
+        <input type="email" placeholder="E-mail cím" id="email" name="email"
+          value="<%= typeof(email_val) != 'undefined' ? email_val:'' %>" />
+        <% } %>
+
+
+        <% if (typeof(password) != "undefined") { %>
+        <label for="confirm_password">Jelszó megerősítése</label>
+        <input class="passerror" type="password" placeholder="Jelszó megerősítése" id="confirm_password"
+          name="confirm_password" />
+          <h5 class="alert">A jelszónak ......</h5>
+        <% } %>
+        <% if (typeof(password) == "undefined") { %>
+        <label for="confirm_password">Jelszó megerősítése</label>
+        <input type="password" placeholder="Jelszó megerősítése" id="confirm_password" name="confirm_password" />
+        <% } %>
+
+
+      </div>
+    </div>
+    <div class="buttonDiv">
+      <button class="reg_log_button" type="submit">Regisztráció</button>
+      <label>Már van fiókod? <a href="/">Jelentkezz be</a></label>
+    </div>
+  </form>
+</body>
+
+</html>

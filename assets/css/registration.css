@@ -1,0 +1,40 @@
+.background .shape{
+    height: 250px;
+    width: 250px;
+    position: absolute;
+    border-radius: 50%;
+}
+.shape:first-child{
+    left: -240px;
+    top: -70px;
+}
+.shape:last-child{
+    right: -230px;
+    bottom: -70px;
+}
+form{
+    height: auto;
+    width: 650px;
+}
+button{
+    width: 50%;
+}
+.row {
+    display: flex;
+    gap: 20px; /* Térköz a két oszlop között */
+}
+.column {
+    flex: 1; /* Egyenlő szélességű oszlopok */
+}
+.regerror{
+    color:rgb(255, 88, 88);;
+    visibility: hidden;
+}
+.passerror{
+    outline: none;
+    box-shadow: 0px 0px 5px red;
+    border:1px solid rgb(255, 88, 88);
+}
+.alert {
+    color: rgb(255, 88, 88);
+}

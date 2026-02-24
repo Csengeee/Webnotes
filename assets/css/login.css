@@ -1,0 +1,21 @@
+.background .shape{
+    height: 200px;
+    width: 200px;
+    position: absolute;
+    border-radius: 50%;
+}
+.shape:first-child{
+    left: -80px;
+    top: -80px;
+}
+.shape:last-child{
+    right: -30px;
+    bottom: -80px;
+}
+form{
+    height: 520px;
+    width: 400px;
+}
+button{
+    width: 100%;
+}

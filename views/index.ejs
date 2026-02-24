@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="hu">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="/css/index.css" />
+    <link rel="stylesheet" href="/css/notes.css" />
+    <title>WebNotes</title>
+    <!-- Accessibility Enhancements -->
+    <style>
+      /* Responsive Design Enhancements */
+      @media (max-width: 600px) {
+        .column_2 {
+          width: 100%;
+        }
+        .plusBTN {
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+        }
+      }
+      /* Toast Notification Styles */
+      .toast {
+        visibility: hidden;
+        min-width: 250px;
+        margin-left: -125px;
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        border-radius: 2px;
+        padding: 16px;
+        position: fixed;
+        z-index: 1;
+        left: 50%;
+        bottom: 30px;
+        font-size: 17px;
+      }
+
+      .toast.show {
+        visibility: visible;
+        -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        animation: fadein 0.5s, fadeout 0.5s 2.5s;
+      }
+
+      @-webkit-keyframes fadein {
+        from {
+          bottom: 0;
+          opacity: 0;
+        }
+        to {
+          bottom: 30px;
+          opacity: 1;
+        }
+      }
+
+      @keyframes fadein {
+        from {
+          bottom: 0;
+          opacity: 0;
+        }
+        to {
+          bottom: 30px;
+          opacity: 1;
+        }
+      }
+
+      @-webkit-keyframes fadeout {
+        from {
+          bottom: 30px;
+          opacity: 1;
+        }
+        to {
+          bottom: 60px;
+          opacity: 0;
+        }
+      }
+
+      @keyframes fadeout {
+        from {
+          bottom: 30px;
+          opacity: 1;
+        }
+        to {
+          bottom: 60px;
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="background">
+      <div class="shape"></div>
+      <div class="shape"></div>
+    </div>
+
+    <div id="container">
+      <div class="header">
+        <div class="headerTitle">WebNotes</div>
+        <div class="userSection">
+          <div class="userName">
+            <span class="userIcon">👤</span>
+            <span class="userText"><%= user.username %></span>
+          </div>
+          <div class="logout_btn">
+            <a href="/logout" class="logout_link">Kijelentkezés</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="container2">
+      <div class="row">
+        <div class="column_1"></div>
+        <div class="column_2">
+          <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="Jegyzetek keresése..." aria-label="Jegyzetek keresése" />
+          </div>
+          <div id="noteList"></div>
+        </div>
+        <div class="column_3">
+          <button class="plusBTN" onclick="openNoteModal()" aria-label="Új jegyzet hozzáadása">+</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Note Modal -->
+    <div id="noteModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="noteModalLabel">
+      <div class="modal-content">
+        <input type="text" id="noteTitle" placeholder="Cím" aria-label="Jegyzet címe" />
+        <textarea id="noteContent" placeholder="Tartalom" rows="5" aria-label="Jegyzet tartalma"></textarea>
+
+        <!-- Tag Input Section -->
+        <div class="tag-container" id="tagContainer"></div>
+        <input type="text" id="tagInput" class="tag-input" placeholder="Add hozzá a címkéket (vesszővel elválasztva)" aria-label="Címkék hozzáadása" />
+
+        <div class="modal-buttons">
+          <button class="modal-save" onclick="saveNote()">Mentés</button>
+          <button class="modal-cancel" onclick="closeNoteModal()">Mégse</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <!-- Place the first <script> tag in your HTML's <head> -->
+    <script src="https://cdn.jsdelivr.net/npm/hugerte@1.0.4/hugerte.min.js"></script>
+    <script>
+      hugerte.init({
+        selector: "textarea",
+        plugins: [
+          // Core editing features
+          "anchor",
+          "autolink",
+          "charmap",
+          "codesample",
+          "emoticons",
+          "image",
+          "link",
+          "lists",
+          "media",
+          "searchreplace",
+          "table",
+          "visualblocks",
+          "wordcount",
+        ],
+        toolbar: "undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat",
+        tinycomments_mode: "embedded",
+        toolbar: "language",
+        spellchecker_language: "hu",
+      })
+    </script>
+    <script>
+      let notes = []
+      let editingIndex = -1
+
+      function sanitizeInput(input) {
+        const tempDiv = document.createElement("div")
+        tempDiv.textContent = input
+        return tempDiv.innerHTML
+      }
+
+      function showToast(message) {
+        const toast = document.getElementById("toast")
+        toast.textContent = message
+        toast.className = "toast show"
+        setTimeout(() => {
+          toast.className = toast.className.replace("show", "")
+        }, 3000)
+      }
+
+      function openNoteModal(index = -1) {
+        const modal = document.getElementById("noteModal")
+        const titleInput = document.getElementById("noteTitle")
+        const contentInput = document.getElementById("noteContent")
+        const tagContainer = document.getElementById("tagContainer")
+        const tagInput = document.getElementById("tagInput")
+
+        if (index !== -1) {
+          editingIndex = index
+          titleInput.value = notes[index].title
+          contentInput.value = notes[index].content
+
+          tagContainer.innerHTML = ""
+          notes[index].tags.forEach((tag) => createTagElement(tag))
+        } else {
+          editingIndex = -1
+          titleInput.value = ""
+          contentInput.value = ""
+          tagContainer.innerHTML = ""
+          tagInput.value = ""
+        }
+
+        modal.style.display = "block"
+        titleInput.focus()
+      }
+
+      function createTagElement(tagText) {
+        const tagContainer = document.getElementById("tagContainer")
+        const tagElement = document.createElement("div")
+        tagElement.classList.add("tag")
+        tagElement.innerHTML = `
+    ${sanitizeInput(tagText)}
+    <span class="tag-delete" onclick="deleteTag(this)" aria-label="Címke törlése">✖</span>
+  `
+        tagContainer.appendChild(tagElement)
+      }
+
+      function deleteTag(deleteButton) {
+        deleteButton.closest(".tag").remove()
+      }
+
+      document.getElementById("tagInput").addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === ",") {
+          e.preventDefault()
+          const tagText = this.value.trim()
+          if (tagText) {
+            const existingTags = Array.from(document.querySelectorAll(".tag")).map((tag) => tag.textContent.trim().replace("✖", ""))
+            if (!existingTags.includes(tagText)) {
+              createTagElement(tagText)
+              this.value = ""
+            } else {
+              alert("Ez a címke már létezik!")
+            }
+          }
+        }
+      })
+
+      async function saveNote() {
+        const title = document.getElementById("noteTitle").value
+        const content = document.getElementById("noteContent").value
+        const tags = Array.from(document.querySelectorAll(".tag")).map((tag) => tag.textContent.trim().replace("✖", ""))
+        const createdAt = new Date().toLocaleString()
+
+        if (!title || !content) {
+          alert("A cím és a tartalom mezők kitöltése kötelező!")
+          return
+        }
+
+        const note = { title, content, tags, createdAt }
+        const notes = JSON.stringify([note])
+
+        try {
+          const response = await fetch("/notes/save", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ notes }),
+          })
+          if (response.ok) {
+            const data = await response.json()
+            renderNotes()
+            closeNoteModal()
+            showToast("Jegyzet sikeresen mentve!")
+          } else {
+            throw new Error("Hiba történt a mentés során.")
+          }
+        } catch (error) {
+          alert(error.message)
+        }
+      }
+
+      async function deleteNote(index) {
+        if (confirm("Biztosan törli a jegyzetet?")) {
+          try {
+            const response = await fetch("/notes/delete", {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ id: notes[index].id }),
+            })
+            if (response.ok) {
+              notes.splice(index, 1)
+              renderNotes()
+              showToast("Jegyzet sikeresen törölve!")
+            } else {
+              throw new Error("Hiba történt a törlés során.")
+            }
+          } catch (error) {
+            alert(error.message)
+          }
+        }
+      }
+
+      function renderNotes(notes) {
+        const noteList = document.getElementById("noteList")
+        noteList.innerHTML = ""
+
+        if (notes.length === 0) {
+          noteList.innerHTML = "<div class='no-notes'>Nincsenek jegyzetek.</div>"
+          return
+        }
+      }
+
+      document.getElementById("searchInput").addEventListener("input", function () {
+        const searchTerm = this.value.toLowerCase()
+        const filteredNotes = notes.filter((note) => note.title.toLowerCase().includes(searchTerm) || note.content.toLowerCase().includes(searchTerm) || note.tags.some((tag) => tag.toLowerCase().includes(searchTerm)))
+        renderNotes(filteredNotes)
+      })
+
+      async function loadNotes() {
+        try {
+          const response = await fetch("/notes/list")
+          if (response.ok) {
+            notes = await response.json()
+            renderNotes(notes)
+          } else {
+            throw new Error("Hiba történt a jegyzetek betöltése során.")
+          }
+        } catch (error) {
+          alert(error.message)
+        }
+      }
+
+      function closeNoteModal() {
+        const modal = document.getElementById("noteModal")
+        modal.style.display = "none"
+      }
+
+      window.onclick = function (event) {
+        const modal = document.getElementById("noteModal")
+        if (event.target === modal) {
+          closeNoteModal()
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        loadNotes()
+      })
+    </script>
+  </body>
+</html>
