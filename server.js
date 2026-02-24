@@ -1,5 +1,5 @@
-const express = require("express");
 const dotenv = require("dotenv").config();
+const express = require("express");
 const cors = require("cors");
 const logger = require('morgan');
 const appLogger = require('./modules/logger')
@@ -36,7 +36,8 @@ try {
 }
 
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'nagyon_titkos_tartalek_kulcs_123', 
+  // Itt a javítás: ha a process.env.SESSION_SECRET üres, használja a fix szöveget
+  secret: process.env.SESSION_SECRET || 'WebNotes_Fix_Titkos_Kulcs_123', 
   resave: false,
   saveUninitialized: false,
   store: sessionStore,
