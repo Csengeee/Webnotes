@@ -1,0 +1,72 @@
+[2026-02-24T13:20:16.859Z] [ERROR]: 500 - secret option required for sessions - / - GET - ::1
+Stack: Error: secret option required for sessions
+    at session (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-session\index.js:211:12)
+    at Layer.handle [as handle_request] (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:328:13)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:280:10)
+    at SendStream.error (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\serve-static\index.js:121:7)
+    at SendStream.emit (node:events:519:28)
+    at SendStream.error (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\send\index.js:270:17)
+    at SendStream.onStatError (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\send\index.js:417:12)
+[2026-02-24T13:20:24.792Z] [ERROR]: 500 - secret option required for sessions - / - GET - ::1
+Stack: Error: secret option required for sessions
+    at session (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-session\index.js:211:12)
+    at Layer.handle [as handle_request] (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:328:13)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:280:10)
+    at SendStream.error (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\serve-static\index.js:121:7)
+    at SendStream.emit (node:events:519:28)
+    at SendStream.error (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\send\index.js:270:17)
+    at SendStream.onStatError (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\send\index.js:417:12)
+[2026-02-24T13:20:25.420Z] [ERROR]: 500 - secret option required for sessions - / - GET - ::1
+Stack: Error: secret option required for sessions
+    at session (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-session\index.js:211:12)
+    at Layer.handle [as handle_request] (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:328:13)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:280:10)
+    at SendStream.error (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\serve-static\index.js:121:7)
+    at SendStream.emit (node:events:519:28)
+    at SendStream.error (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\send\index.js:270:17)
+    at SendStream.onStatError (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\send\index.js:417:12)
+[2026-02-24T13:20:26.263Z] [ERROR]: 500 - secret option required for sessions - / - GET - ::1
+Stack: Error: secret option required for sessions
+    at session (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-session\index.js:211:12)
+    at Layer.handle [as handle_request] (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:328:13)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:280:10)
+    at SendStream.error (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\serve-static\index.js:121:7)
+    at SendStream.emit (node:events:519:28)
+    at SendStream.error (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\send\index.js:270:17)
+    at SendStream.onStatError (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\send\index.js:417:12)
+[2026-02-24T13:20:45.307Z] [ERROR]: 500 - secret option required for sessions - / - GET - ::1
+Stack: Error: secret option required for sessions
+    at session (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-session\index.js:211:12)
+    at Layer.handle [as handle_request] (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:328:13)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:280:10)
+    at SendStream.error (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\serve-static\index.js:121:7)
+    at SendStream.emit (node:events:519:28)
+    at SendStream.error (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\send\index.js:270:17)
+    at SendStream.onStatError (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\send\index.js:417:12)
+[2026-02-24T13:23:18.392Z] [ERROR]: 500 - secret option required for sessions - / - GET - ::1
+Stack: Error: secret option required for sessions
+    at session (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-session\index.js:211:12)
+    at Layer.handle [as handle_request] (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\layer.js:95:5)
+    at trim_prefix (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:328:13)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:286:9
+    at Function.process_params (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:280:10)
+    at SendStream.error (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\serve-static\index.js:121:7)
+    at SendStream.emit (node:events:519:28)
+    at SendStream.error (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\send\index.js:270:17)
+    at SendStream.onStatError (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\send\index.js:417:12)
