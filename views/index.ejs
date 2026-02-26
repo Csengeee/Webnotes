@@ -132,7 +132,8 @@
         const tagContainer = document.getElementById('tagContainer');
         const tagElement = document.createElement('div');
         tagElement.classList.add('tag');
-        tagElement.innerHTML = `${DOMPurify.sanitize(tagText)} <span class="tag-delete" onclick="this.parentElement.remove()" aria-label="Címke törlése">✖</span>`;
+        // A 'this.parentElement.remove()' a legbiztosabb módja a vizuális törlésnek
+        tagElement.innerHTML = `${DOMPurify.sanitize(tagText)} <span class="tag-delete" onclick="this.parentElement.remove()" style="cursor:pointer; margin-left:5px; color:#f95656;">✖</span>`;
         tagContainer.appendChild(tagElement);
       }
 
@@ -204,20 +205,28 @@
         });
       }
 
-      async function deleteNoteById(id) {
-        if (!confirm('Biztosan törlöd?')) return;
+      async function deleteNoteById(noteId) {
+        if (!confirm('Biztosan törli a jegyzetet?')) return;
         try {
-          const res = await fetch('/notes/delete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id })
+          const response = await fetch('/notes/delete', { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify({ id: noteId }) 
           });
-          if (res.ok) {
-            notes = notes.filter(n => n.id !== id);
+          
+          const resData = await response.json();
+          
+          if (response.ok && resData.status === "success") {
+            // Csak akkor vegyük ki a listából, ha a szerver tényleg törölte
+            notes = notes.filter(n => Number(n.id) !== Number(noteId));
             renderNotes();
-            showToast('Törölve!');
+            showToast('Jegyzet sikeresen törölve!');
+          } else {
+            throw new Error(resData.message || 'Hiba történt a törlés során.');
           }
-        } catch (err) { showToast('Hiba a törlésnél'); }
+        } catch (error) { 
+          alert(error.message); 
+        }
       }
 
       async function loadNotes() {

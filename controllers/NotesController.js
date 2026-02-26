@@ -1,4 +1,4 @@
-const { connectDB, getConnection } = require("../config/db");
+const { connectDB } = require("../config/db");
 const sanitizer = require('../modules/inputSanitizer');
 
 // Segédfüggvény a jegyzetek egységes lekéréséhez
@@ -131,17 +131,22 @@ const remove = async (req, res, next) => {
   if (!id) return res.status(400).json({ status: "error", message: "Note id is required" });
 
   try {
-    // Note_tag törlése manuálisan (ha nincs ON DELETE CASCADE)
-    await connectDB('DELETE FROM note_tag WHERE note_id = ?', [id]);
-    
-    const [err, result] = await connectDB('DELETE FROM note WHERE id = ? AND user_id = ?', [id, user.id]);
-    
-    if (err) throw err;
-    if (result.affectedRows === 0) return res.status(404).json({ status: "error", message: "Note not found" });
+    // Ha az SQL-ben beállítottad az ON DELETE CASCADE-et, akkor a note_tag törlése nem kötelező manuálisan, 
+    // de a biztonság kedvéért itt megteheted:
+    await connectDB('DELETE FROM note_tag WHERE note_id = ?', [noteId]);
 
-    res.status(200).json({ status: "success", message: "Note deleted" });
+    // A törlésnél mindig ellenőrizzük a user_id-t is!
+    const [err, result] = await connectDB('DELETE FROM note WHERE id = ? AND user_id = ?', [noteId, user.id]);
+
+    if (err) throw err;
+
+    if (!result || result.affectedRows === 0) {
+      return res.status(404).json({ status: "error", message: "A jegyzet nem található vagy nincs jogosultságod törölni." });
+    }
+
+    return res.status(200).json({ status: "success", message: "Jegyzet sikeresen törölve" });
   } catch (error) {
-    next(error);
+    next(error); // Átadja a hibát a loggernek és az errorHandlernek
   }
 };
 

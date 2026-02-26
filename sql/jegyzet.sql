@@ -23,10 +23,11 @@ CREATE TABLE tag (
     name VARCHAR(100)
 );
 
+DROP TABLE IF EXISTS note_tag;
 CREATE TABLE note_tag (
     note_id INT,
     tag_id INT,
     PRIMARY KEY (note_id, tag_id),
-    FOREIGN KEY (note_id) REFERENCES note(id),
-    FOREIGN KEY (tag_id) REFERENCES tag(id)
+    FOREIGN KEY (note_id) REFERENCES note(id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tag(id) ON DELETE CASCADE
 );
