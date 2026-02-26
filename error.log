@@ -70,3 +70,27 @@ Stack: Error: secret option required for sessions
     at SendStream.emit (node:events:519:28)
     at SendStream.error (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\send\index.js:270:17)
     at SendStream.onStatError (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\send\index.js:417:12)
+[2026-02-26T14:23:03.144Z] [ERROR]: 500 - noteId is not defined - /notes/delete - POST - ::1
+Stack: ReferenceError: noteId is not defined
+    at remove (C:\Users\Csenge\Desktop\Webnotes\Webnotes\controllers\NotesController.js:143:64)
+    at Layer.handle [as handle_request] (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\route.js:149:13)
+    at requireAuth (C:\Users\Csenge\Desktop\Webnotes\Webnotes\modules\auth.js:3:12)
+    at Layer.handle [as handle_request] (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:346:12)
+[2026-02-26T14:23:08.366Z] [ERROR]: 500 - noteId is not defined - /notes/delete - POST - ::1
+Stack: ReferenceError: noteId is not defined
+    at remove (C:\Users\Csenge\Desktop\Webnotes\Webnotes\controllers\NotesController.js:143:64)
+    at Layer.handle [as handle_request] (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\route.js:149:13)
+    at requireAuth (C:\Users\Csenge\Desktop\Webnotes\Webnotes\modules\auth.js:3:12)
+    at Layer.handle [as handle_request] (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:346:12)
