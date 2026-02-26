@@ -26,7 +26,7 @@ const getNotesByUserId = async (userId) => {
   }));
 };
 
-const save = async (req, res) => {
+const save = async (req, res, next) => {
   const { notes } = req.body;
   const user = req.session.user;
 
@@ -39,9 +39,9 @@ const save = async (req, res) => {
   }
 
   const connection = await getConnection();
-
-try {
-    // Tranzakció indítása
+  
+  try {
+    // Tranzakció indítása a biztonságos mentéshez
     await new Promise((resolve, reject) => {
       connection.beginTransaction(err => err ? reject(err) : resolve());
     });
@@ -54,7 +54,7 @@ try {
       let noteId = rawNote.id;
 
       if (noteId) {
-        // UPDATE - Mindig ellenőrizzük a user_id-t is a biztonság érdekében!
+        // 1. Jegyzet frissítése (mindig ellenőrizzük a user_id-t!)
         const updateQuery = 'UPDATE note SET title = ?, content = ?, modification_date = ? WHERE id = ? AND user_id = ?';
         await new Promise((resolve, reject) => {
           connection.query(updateQuery, [title, content, new Date(), noteId, user.id], (err, res) => {
@@ -63,12 +63,12 @@ try {
           });
         });
         
-        // Címkék frissítése: régi törlése, újak hozzáadása
+        // 2. KRITIKUS JAVÍTÁS: Régi címkekapcsolatok törlése az újrakötés előtt
         await new Promise((resolve, reject) => {
           connection.query('DELETE FROM note_tag WHERE note_id = ?', [noteId], err => err ? reject(err) : resolve());
         });
       } else {
-        // INSERT
+        // Új jegyzet beszúrása
         const insertQuery = 'INSERT INTO note (user_id, title, content, creation_date, modification_date) VALUES (?, ?, ?, ?, ?)';
         noteId = await new Promise((resolve, reject) => {
           connection.query(insertQuery, [user.id, title, content, new Date(), new Date()], (err, res) => {
@@ -78,36 +78,43 @@ try {
         });
       }
 
-      // Címkék feldolgozása (tömeges beszúrás helyett itt az egyszerűség kedvéért egyesével, de tranzakcióban)
+      // 3. Címkék feldolgozása és újrakötése
       for (const tagName of tags) {
+        // Biztosítjuk, hogy a címke létezik a tag táblában
         await new Promise((resolve, reject) => {
           connection.query('INSERT IGNORE INTO tag (name) VALUES (?)', [tagName], err => err ? reject(err) : resolve());
         });
+        
+        // Lekérjük a címke ID-ját
         const tagId = await new Promise((resolve, reject) => {
           connection.query('SELECT id FROM tag WHERE name = ?', [tagName], (err, res) => {
             if (err || res.length === 0) reject(err || new Error('Tag error'));
             else resolve(res[0].id);
           });
         });
+
+        // Új kapcsolat létrehozása a jegyzet és a címke között
         await new Promise((resolve, reject) => {
           connection.query('INSERT INTO note_tag (note_id, tag_id) VALUES (?, ?)', [noteId, tagId], err => err ? reject(err) : resolve());
         });
       }
     }
 
-    // Ha minden sikerült, véglegesítjük
+    // Tranzakció véglegesítése
     await new Promise((resolve, reject) => {
       connection.commit(err => err ? reject(err) : resolve());
     });
 
+    // Frissített lista lekérése és visszaküldése
     const updatedNotes = await getNotesByUserId(user.id);
     res.status(200).json({ status: 'success', notes: updatedNotes });
 
   } catch (error) {
+    // Hiba esetén minden módosítás visszagörgetése
     await new Promise(resolve => connection.rollback(() => resolve()));
-    next(error); // Átadjuk a központi hibakezelőnek
+    next(error); 
   } finally {
-    connection.release();
+    connection.release(); // Kapcsolat felszabadítása
   }
 };
 

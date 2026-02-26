@@ -129,12 +129,18 @@
       }
 
       function createTagElement(tagText) {
-        const tagContainer = document.getElementById('tagContainer');
-        const tagElement = document.createElement('div');
-        tagElement.classList.add('tag');
-        // A 'this.parentElement.remove()' a legbiztosabb módja a vizuális törlésnek
-        tagElement.innerHTML = `${DOMPurify.sanitize(tagText)} <span class="tag-delete" onclick="this.parentElement.remove()" style="cursor:pointer; margin-left:5px; color:#f95656;">✖</span>`;
-        tagContainer.appendChild(tagElement);
+      const tagContainer = document.getElementById('tagContainer');
+      const tagElement = document.createElement('div');
+      tagElement.classList.add('tag');
+      
+      // A DOMPurify használata mellett a törlés gomb eseményét pontosítjuk
+      tagElement.innerHTML = `
+        <span>${DOMPurify.sanitize(tagText)}</span>
+        <span class="tag-delete" onclick="this.parentElement.remove()" 
+              style="cursor:pointer; margin-left:8px; color:#f95656;" 
+              aria-label="Címke törlése">✖</span>
+      `;
+      tagContainer.appendChild(tagElement);
       }
 
       document.getElementById('tagInput').addEventListener('keydown', function (e) {
@@ -156,7 +162,8 @@
       async function saveNote() {
         const title = document.getElementById('noteTitle').value.trim();
         const content = hugerte.get('noteContent').getContent().trim();
-        const tags = Array.from(document.querySelectorAll('.tag')).map(t => t.textContent.trim().replace('✖', '').trim());
+        // Így csak a <span> tartalmát (a szöveget) vesszük ki, a "✖"-t nem
+        const tags = Array.from(document.querySelectorAll('#tagContainer .tag span:first-child')).map(t => t.textContent.trim());
 
         if (!title || !content) {
           showToast('A cím és a tartalom kitöltése kötelező!');
