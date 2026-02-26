@@ -30,8 +30,7 @@ router.get('/register', (req, res) => {
 
 // modules/routes.js
 router.get('/users', requireAuth, async (req, res) => {
-  const [err, rows] = await connectDB('SELECT id, username, name, email FROM user');
-  if (err) return res.status(500).send('DB hiba');
+  const [err, rows] = await connectDB('SELECT id, username, name, email FROM user');  if (err) return res.status(500).send('DB hiba');
   res.render('users', { users: rows });
 });
 
