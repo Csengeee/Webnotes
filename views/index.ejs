@@ -216,20 +216,20 @@
         if (!confirm('Biztosan törli a jegyzetet?')) return;
         try {
           const response = await fetch('/notes/delete', { 
-            method: 'POST', 
-            headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ id: noteId }) 
+              method: 'POST', 
+              headers: { 'Content-Type': 'application/json' }, 
+              body: JSON.stringify({ id: noteId }) 
           });
           
-          const resData = await response.json();
-          
-          if (response.ok && resData.status === "success") {
-            // Csak akkor vegyük ki a listából, ha a szerver tényleg törölte
+          const result = await response.json();
+
+          if (response.ok && result.status === "success") {
+            // Csak akkor vegyük ki a listából, ha a szerver is visszaigazolta
             notes = notes.filter(n => Number(n.id) !== Number(noteId));
             renderNotes();
             showToast('Jegyzet sikeresen törölve!');
           } else {
-            throw new Error(resData.message || 'Hiba történt a törlés során.');
+            throw new Error(result.message || 'Hiba történt a törlés során.');
           }
         } catch (error) { 
           alert(error.message); 
