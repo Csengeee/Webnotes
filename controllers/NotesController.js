@@ -1,4 +1,4 @@
-const { connectDB } = require("../config/db");
+const { connectDB, getConnection } = require("../config/db");
 const sanitizer = require('../modules/inputSanitizer');
 
 // Segédfüggvény a jegyzetek egységes lekéréséhez
