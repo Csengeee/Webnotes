@@ -1,42 +1,38 @@
-// Basic input sanitizer utilities — lightweight, not a replacement for a robust HTML sanitizer.
-const MAX_TITLE_LENGTH = 255;
-const MAX_CONTENT_LENGTH = 20000;
-const MAX_TAG_LENGTH = 50;
-const MAX_TAGS = 20;
+const sanitizeHtml = require('sanitize-html');
 
-function stripScripts(str) {
-  return String(str || '').replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '');
-}
+const MAX_TITLE_LENGTH = 100;
+const MAX_CONTENT_LENGTH = 5000;
 
-function stripTags(str) {
-  // remove any HTML tags
-  return String(str || '').replace(/<[^>]*>/g, '');
-}
+const sanitizeText = (text, maxLength) => {
+    if (typeof text !== 'string') return '';
+    
+    // A címeknél továbbra is tiltunk minden HTML-t
+    if (maxLength <= MAX_TITLE_LENGTH) {
+        return text.replace(/<[^>]*>?/gm, '').substring(0, maxLength);
+    }
 
-function normalizeWhitespace(str) {
-  return String(str || '').replace(/\s+/g, ' ').trim();
-}
+    // A tartalomnál engedélyezzük a biztonságos formázást
+    const clean = sanitizeHtml(text, {
+        allowedTags: ['b', 'i', 'em', 'strong', 'u', 'ul', 'ol', 'li', 'p', 'br', 'div', 'span'],
+        allowedAttributes: {
+            'span': ['style'], // Ha a szerkesztő stílusokat is használna
+            'p': ['style']
+        }
+    });
 
-function sanitizeText(input, maxLen = 0) {
-  let s = stripScripts(input);
-  s = stripTags(s);
-  s = normalizeWhitespace(s);
-  if (maxLen && s.length > maxLen) s = s.substring(0, maxLen);
-  return s;
-}
+    return clean.substring(0, maxLength);
+};
 
-function sanitizeTags(tags) {
-  if (!Array.isArray(tags)) return [];
-  const cleaned = tags.map(t => sanitizeText(t, MAX_TAG_LENGTH)).filter(t => t.length > 0);
-  // unique and limit
-  return [...new Set(cleaned)].slice(0, MAX_TAGS);
-}
+const sanitizeTags = (tags) => {
+    if (!Array.isArray(tags)) return [];
+    return tags
+        .map(tag => typeof tag === 'string' ? tag.replace(/<[^>]*>?/gm, '').trim() : '')
+        .filter(tag => tag.length > 0 && tag.length <= 20);
+};
 
 module.exports = {
-  sanitizeText,
-  sanitizeTags,
-  MAX_TITLE_LENGTH,
-  MAX_CONTENT_LENGTH,
-  MAX_TAG_LENGTH,
-  MAX_TAGS,
+    sanitizeText,
+    sanitizeTags,
+    MAX_TITLE_LENGTH,
+    MAX_CONTENT_LENGTH
 };
