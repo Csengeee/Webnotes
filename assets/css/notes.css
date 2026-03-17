@@ -141,6 +141,31 @@ body {
     flex-shrink: 0;
 }
 
+.global-tag-container {
+    width: 80%;
+    margin: -20px auto 30px auto; /* A kereső alá húzzuk kicsit közelebb */
+    display: flex;
+    flex-wrap: wrap; /* Vagy 'nowrap' és 'overflow-x: auto', ha egy sorban akarod görgetni */
+    gap: 10px;
+    justify-content: center;
+}
+
+.global-tag {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.global-tag:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
 /*.plusBTN {
   height: 80px;
   line-height: 80px;
