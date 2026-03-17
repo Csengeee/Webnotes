@@ -271,9 +271,7 @@
           showToast('A cím és a tartalom kitöltése kötelező!');
           return;
         }
-
-        const note = { id: editingId, title, content, tags };
-        
+        const note = { id: editingId, title, content, tags };        
         try {
           const response = await fetch('/notes/save', {
             method: 'POST',
@@ -293,6 +291,20 @@
         }
       }
 
+      function handleSearch() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const allCards = document.querySelectorAll('.note-card');
+        allCards.forEach(card => {
+          const title = card.querySelector('h3').textContent.toLowerCase();
+          const content = card.querySelector('.note-body').textContent.toLowerCase();
+          const tags = Array.from(card.querySelectorAll('.tag')).map(t => t.textContent.toLowerCase());
+          const matches = title.includes(searchTerm) || 
+                          content.includes(searchTerm) || 
+                          tags.some(tag => tag.includes(searchTerm));
+          card.style.display = matches ? 'inline-block' : 'none';
+        });
+      }
+
       function updateGlobalTags() {
       const tagListContainer = document.getElementById('globalTagList');
       if (!tagListContainer) return;
@@ -310,19 +322,14 @@
       allTags.forEach(tag => {
           const tagElement = document.createElement('div');
           tagElement.className = 'global-tag';
-          tagElement.textContent = tag;          
-          // Extra: Ha rákattintasz, keressen rá arra a címkére
+          tagElement.textContent = '#' + tag;
           tagElement.onclick = () => {
-              document.getElementById('searchInput').value = tag;
-              const event = new Event('input', {
-        bubbles: true,
-        cancelable: true,
-    });
-    sInput.dispatchEvent(event);
+            const sInput = document.getElementById('searchInput');
+            sInput.value = tag;
+            handleSearch();
           };
-          
           tagListContainer.appendChild(tagElement);
-    });
+        });
     }
 
       function renderNotes(list = notes) {
@@ -381,66 +388,6 @@
           renderNotes();
         } catch (err) { console.error(err); }
       }
-
-      // Eseménykezelő a gépeléshez
-    document.getElementById('searchInput').addEventListener('input', handleSearch);
-
-    function handleSearch() {
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-        const allCards = document.querySelectorAll('.note-card');
-
-        allCards.forEach(card => {
-            const title = card.querySelector('h3').textContent.toLowerCase();
-            const content = card.querySelector('.note-content').textContent.toLowerCase();
-            const tags = Array.from(card.querySelectorAll('.tag')).map(t => t.textContent.toLowerCase());
-            
-            // Ha a címben, tartalomban VAGY a címkék között szerepel a keresőszó
-            const matches = title.includes(searchTerm) || 
-                            content.includes(searchTerm) || 
-                            tags.some(tag => tag.includes(searchTerm));
-            
-            card.style.display = matches ? 'inline-block' : 'none';
-        });
-    }
-
-    function updateGlobalTags() {
-    const tagListContainer = document.getElementById('globalTagList');
-    if (!tagListContainer) return;
-
-    const allTags = new Set();
-    notes.forEach(note => {
-        if (note.tags) note.tags.forEach(tag => allTags.add(tag));
-    });
-
-    tagListContainer.innerHTML = '';
-    
-    // "Minden" gomb (opcionális: törli a szűrést)
-    if (allTags.size > 0) {
-        const clearBtn = document.createElement('div');
-        clearBtn.className = 'global-tag';
-        clearBtn.style.background = 'rgba(255,0,0,0.2)'; // Pirosas árnyalat
-        clearBtn.textContent = 'Összes törlése';
-        clearBtn.onclick = () => {
-            document.getElementById('searchInput').value = '';
-            handleSearch();
-        };
-        tagListContainer.appendChild(clearBtn);
-    }
-
-    allTags.forEach(tag => {
-        const tagElement = document.createElement('div');
-        tagElement.className = 'global-tag';
-        tagElement.textContent = tag; // Adunk neki egy szép # jelet
-        
-        tagElement.onclick = () => {
-            const sInput = document.getElementById('searchInput');
-            sInput.value = tag; // Beírja a címkét
-            handleSearch();     // AZONNAL ELINDÍTJA A KERESÉST
-        };
-        
-        tagListContainer.appendChild(tagElement);
-    });
-}
 
       document.addEventListener('DOMContentLoaded', loadNotes);
       window.onclick = (e) => { if (e.target == document.getElementById('noteModal')) closeNoteModal(); };
