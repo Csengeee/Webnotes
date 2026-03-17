@@ -318,7 +318,6 @@
       });
 
       tagListContainer.innerHTML = '';      
-      // Kirajzoljuk őket
       allTags.forEach(tag => {
           const tagElement = document.createElement('div');
           tagElement.className = 'global-tag';
@@ -352,9 +351,7 @@
           noteList.appendChild(card);
         });
         updateGlobalTags();
-      }
-
-    
+      }    
 
       async function deleteNoteById(noteId) {
         if (!confirm('Biztosan törli a jegyzetet?')) return;
