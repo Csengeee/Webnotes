@@ -1,7 +1,7 @@
 const sanitizeHtml = require('sanitize-html');
 
 const MAX_TITLE_LENGTH = 100;
-const MAX_CONTENT_LENGTH = 5000;
+const MAX_CONTENT_LENGTH = 10000;
 
 const sanitizeText = (text, maxLength) => {
     if (typeof text !== 'string') return '';
@@ -13,11 +13,13 @@ const sanitizeText = (text, maxLength) => {
 
     // A tartalomnál engedélyezzük a biztonságos formázást
     const clean = sanitizeHtml(text, {
-        allowedTags: ['b', 'i', 'em', 'strong', 'u', 'ul', 'ol', 'li', 'p', 'br', 'div', 'span'],
+        allowedTags: ['b', 'i', 'em', 'strong', 'u', 'ul', 'ol', 'li', 'p', 'br', 'div', 'span', 'img'],
         allowedAttributes: {
             'span': ['style'], // Ha a szerkesztő stílusokat is használna
-            'p': ['style']
-        }
+            'p': ['style'],
+            'img': ['src', 'alt', 'title', 'width', 'height']
+        },
+        allowedSchemes: ['http', 'https', 'data']
     });
 
     return clean.substring(0, maxLength);

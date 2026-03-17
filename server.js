@@ -6,13 +6,35 @@ const appLogger = require('./modules/logger')
 const errorHandler = require('./modules/errorHandler')
 const router = require("./modules/routes");
 const session = require("express-session");
-
-//dotenv.config();
-
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const app = express();
-
-// Port beállítása
 const port = process.env.PORT || 3000;
+
+// Ellenőrizzük, hogy létezik-e a mappa, ha nem, létrehozzuk
+const uploadDir = './public/uploads/';
+if (!fs.existsSync(uploadDir)){
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: uploadDir,
+  filename: (req, file, cb) => {
+    cb(null, 'img-' + Date.now() + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage: storage });
+
+// Statikus mappa kiszolgálása, hogy elérjük a képeket böngészőből
+app.use('/uploads', express.static('public/uploads'));
+
+// Feltöltési végpont
+app.post('/upload-image', upload.single('image'), (req, res) => {
+  if (!req.file) return res.status(400).send('Nincs fájl.');
+  res.json({ location: `/uploads/${req.file.filename}` });
+});
 
 // Public mappa elérhetővé tétele
 app.use(express.static('assets'));

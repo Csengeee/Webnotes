@@ -94,3 +94,90 @@ Stack: ReferenceError: noteId is not defined
     at Layer.handle [as handle_request] (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\layer.js:95:5)
     at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:284:15
     at Function.process_params (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express\lib\router\index.js:346:12)
+[2026-03-17T18:42:00.471Z] [ERROR]: 500 - Lock wait timeout exceeded; try restarting transaction - / - GET - ::1
+Stack: Error: Lock wait timeout exceeded; try restarting transaction
+    at PromisePool.query (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\node_modules\mysql2\promise.js:356:22)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:384:30
+    at new Promise (<anonymous>)
+    at MySQLStore.query (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:381:10)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:269:16
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2026-03-17T18:42:00.569Z] [ERROR]: 500 - read ECONNRESET - /notes/list - GET - ::1
+Stack: Error: read ECONNRESET
+    at PromisePool.query (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\node_modules\mysql2\promise.js:356:22)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:384:30
+    at new Promise (<anonymous>)
+    at MySQLStore.query (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:381:10)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:269:16
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2026-03-17T18:42:00.584Z] [ERROR]: 500 - read ECONNRESET - / - GET - ::1
+Stack: Error: read ECONNRESET
+    at PromisePool.query (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\node_modules\mysql2\promise.js:356:22)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:384:30
+    at new Promise (<anonymous>)
+    at MySQLStore.query (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:381:10)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:269:16
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2026-03-17T18:42:00.614Z] [ERROR]: 500 -  - /notes/list - GET - ::1
+Stack: Error
+    at PromisePool.query (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\node_modules\mysql2\promise.js:356:22)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:384:30
+    at new Promise (<anonymous>)
+    at MySQLStore.query (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:381:10)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:170:16
+[2026-03-17T18:42:00.627Z] [ERROR]: 500 -  - /notes/list - GET - ::1
+Stack: Error
+    at PromisePool.query (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\node_modules\mysql2\promise.js:356:22)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:384:30
+    at new Promise (<anonymous>)
+    at MySQLStore.query (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:381:10)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:170:16
+[2026-03-17T18:42:01.053Z] [ERROR]: 500 -  - /favicon.ico - GET - ::1
+Stack: Error
+    at PromisePool.query (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\node_modules\mysql2\promise.js:356:22)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:384:30
+    at new Promise (<anonymous>)
+    at MySQLStore.query (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:381:10)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:170:16
+[2026-03-17T18:42:58.989Z] [ERROR]: 500 -  - / - GET - ::1
+Stack: Error
+    at PromisePool.query (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\node_modules\mysql2\promise.js:356:22)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:384:30
+    at new Promise (<anonymous>)
+    at MySQLStore.query (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:381:10)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:170:16
+[2026-03-17T18:42:59.190Z] [ERROR]: 500 -  - /favicon.ico - GET - ::1
+Stack: Error
+    at PromisePool.query (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\node_modules\mysql2\promise.js:356:22)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:384:30
+    at new Promise (<anonymous>)
+    at MySQLStore.query (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:381:10)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:170:16
+[2026-03-17T18:43:01.393Z] [ERROR]: 500 -  - / - GET - ::1
+Stack: Error
+    at PromisePool.query (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\node_modules\mysql2\promise.js:356:22)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:384:30
+    at new Promise (<anonymous>)
+    at MySQLStore.query (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:381:10)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:170:16
+[2026-03-17T18:43:01.581Z] [ERROR]: 500 -  - /favicon.ico - GET - ::1
+Stack: Error
+    at PromisePool.query (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\node_modules\mysql2\promise.js:356:22)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:384:30
+    at new Promise (<anonymous>)
+    at MySQLStore.query (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:381:10)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:170:16
+[2026-03-17T18:44:21.439Z] [ERROR]: 500 -  - / - GET - ::1
+Stack: Error
+    at PromisePool.query (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\node_modules\mysql2\promise.js:356:22)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:384:30
+    at new Promise (<anonymous>)
+    at MySQLStore.query (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:381:10)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:170:16
+[2026-03-17T18:44:21.920Z] [ERROR]: 500 -  - /favicon.ico - GET - ::1
+Stack: Error
+    at PromisePool.query (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\node_modules\mysql2\promise.js:356:22)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:384:30
+    at new Promise (<anonymous>)
+    at MySQLStore.query (C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:381:10)
+    at C:\Users\Csenge\Desktop\Webnotes\Webnotes\node_modules\express-mysql-session\index.js:170:16
