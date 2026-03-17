@@ -41,13 +41,13 @@ body {
   bottom: -80px;
 }
 #header-container {
-  top: 50px;
+  top: 20px;
   width: 100%;
   height: 100%;
   position: relative;
 }
 #search-container {
-  top: 150px;
+  top: 100px;
   width: 100%;
   height: 100%;
   position: relative;
@@ -81,7 +81,7 @@ body {
   color: white;
   text-decoration: none;
 }
-.column {
+/*.column {
   float: left;
   width: 33.33%;
   padding: 10px;
@@ -109,8 +109,39 @@ body {
   padding: 10px;
   height: 300px;
   text-align: center;
+}*/
+
+/* A felső sor elrendezése */
+.header-row {
+    width: 80%;
+    display: flex;
+    align-items: center;
+    margin: 40px auto; /* A 40px a felső távolság, az 'auto' teszi középre */
+    box-sizing: border-box;
+    gap: 15px; /* Távolság a kereső és a gomb között */
+    margin-bottom: 30px; /* Távolság a jegyzetektől */
+    padding: 0 20px;
 }
-.plusBTN {
+
+.row {
+  width: 80%;
+  display: flex;
+  align-items: center;
+  margin: 0 auto; /* Középre helyezés */
+  box-sizing: border-box;
+}
+
+/* A kereső mező rugalmasan kitölti a teret */
+.search-wrapper {
+    flex-grow: 1;
+}
+
+/* A gomb wrapper szélessége marad fix */
+.button-wrapper {
+    flex-shrink: 0;
+}
+
+/*.plusBTN {
   height: 80px;
   line-height: 80px;
   width: 80px;
@@ -124,25 +155,29 @@ body {
   display: inline-block;
   background: linear-gradient(to right, #c42727, #f95656);
   box-shadow: 0 0 10px #f8a1a1;
-}
+}*/
 .modal {
   display: none;
   position: fixed;
-  z-index: 1;
+  z-index: 1000;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
   overflow: auto;
   background-color: rgba(0, 0, 0, 0.4);
+  justify-content: center;
+  align-items: flex-start; 
+  padding-top: 50px; /* Távolság a képernyő legtetejétől */
+  overflow: auto;
 }
 .modal-content {
   background-color: rgba(255, 255, 255, 0.13);
-  margin: 15% auto;
+  margin: 0 auto;
   padding: 20px;
   border-radius: 10px;
   width: 80%;
-  max-width: 500px;
+  max-width: 100%;
   backdrop-filter: blur(10px);
   border: 2px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 0 40px rgba(8, 7, 16, 0.6);
@@ -176,12 +211,12 @@ body {
   color: white;
 }
 #noteList {
-    display: grid;
-    gap: 20px;
-    padding: 20px;
+    display: block; /* Biztosítjuk, hogy ne grid legyen */
+    column-width: 400px; /* Egy hasáb minimum szélessége */
+    column-gap: 20px;    /* A hasábok közötti távolság */
     width: 100%;
-    height: auto;
-    overflow-y: visible; /* Engedjük a természetes görgetést */
+    padding: 20px;
+    box-sizing: border-box;
 }
 .note-item {
   background-color: rgba(255, 255, 255, 0.1);
@@ -227,7 +262,8 @@ body {
 }
 .search-input {
   width: 100%;
-  padding: 10px;
+  padding: 12px 20px;
+  border-radius: 25px;
   background-color: rgba(255, 255, 255, 0.13);
   color: white;
   border: none;
@@ -270,13 +306,21 @@ body {
 }
 /* notes.css */
 .note-card {
-  background: rgba(255, 255, 255, 0.13);
-  border-left: 4px solid #23a2f6;
-  padding: 30px;
-  box-sizing: border-box;
-  margin: 12px 0;
-  border-radius: 8px;
-  transition: transform .2s;
+  display: inline-block; /* Ez a kulcs a hasábos elrendezéshez */
+    width: 100%;           /* Kitölti a hasáb szélességét */
+    margin-bottom: 20px;    /* Távolság az alatta lévő jegyzettől */
+    
+    /* Megakadályozza, hogy a jegyzet "félbevágva" kerüljön át a következő oszlopba */
+    break-inside: avoid; 
+    
+    /* Magasság: automatikusan a tartalomhoz (szöveg + képek) igazodik */
+    height: auto; 
+    
+    /* A többi stílusod marad (háttér, keret, padding) */
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 .note-card:hover {
   transform: translateY(-3px);
@@ -284,4 +328,20 @@ body {
 .note-card h3 {
   font-size: 1.4rem;
   margin-bottom: 6px;
+}
+
+/* Minden kép a jegyzetkártyán belül igazodjon a kártya szélességéhez */
+.note-card img {
+    max-width: 100% !important; /* Soha ne legyen szélesebb, mint a kártya */
+    height: auto !important;    /* Tartsa meg az arányait, ne torzuljon */
+    display: block;             /* Ne legyen körülötte felesleges szövegköz */
+    margin: 10px 0;             /* Egy kis távolság alul-felül a szövegtől */
+    border-radius: 8px;         /* Opcionális: lekerekített sarok a képeknek is */
+    object-fit: contain;        /* Biztosítja, hogy a teljes kép látsszon */
+}
+
+/* Ha a hugerte valamilyen tárolóba (pl. figure) teszi a képet, azt is korlátozzuk */
+.note-card figure {
+    max-width: 100% !important;
+    margin: 10px 0;
 }

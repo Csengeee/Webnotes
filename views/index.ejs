@@ -45,7 +45,21 @@
       </div>
     </div>
 
-    <div id="search-container">
+<div id="search-container">
+  <div class="header-row">
+    <div class="search-wrapper">
+      <input type="text" id="searchInput" class="search-input" placeholder="Jegyzetek keresése..." aria-label="Jegyzetek keresése" />
+    </div>
+    <div class="button-wrapper">
+      <button id="addNoteBtn" class="plusBTN" onclick="openNoteModal()" aria-label="Új jegyzet hozzáadása">+</button>
+    </div>
+  </div>
+  <div class="row">
+    <div id="noteList" class="notes-grid"></div>
+  </div>
+</div>
+
+   <!-- <div id="search-container">
       <div class="row">
         <div class="column_1"></div>
         <div class="column_2">
@@ -58,7 +72,7 @@
           <button id="addNoteBtn" class="plusBTN" onclick="openNoteModal()" aria-label="Új jegyzet hozzáadása">+</button>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <div id="noteModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="noteModalLabel">
       <div class="modal-content">
@@ -172,7 +186,7 @@
           xhr.send(formData);
         }),
   
-  content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:16px; background-color: #fff; }'
+  content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:16px; background-color: #fff; } img { max-width: 100%; height: auto; }'
 });
 
       function showToast(message) {
