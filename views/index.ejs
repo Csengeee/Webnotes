@@ -387,6 +387,7 @@
       }
 
       document.addEventListener('DOMContentLoaded', loadNotes);
+      document.getElementById('searchInput').addEventListener('input', handleSearch);
       window.onclick = (e) => { if (e.target == document.getElementById('noteModal')) closeNoteModal(); };
     </script>
   </body>
