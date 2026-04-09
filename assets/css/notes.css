@@ -81,35 +81,6 @@ body {
   color: white;
   text-decoration: none;
 }
-/*.column {
-  float: left;
-  width: 33.33%;
-  padding: 10px;
-}
-.row:after {
-  content: "";
-  display: table;
-  clear: both;
-}
-.column_1 {
-  float: left;
-  width: 12%;
-  padding: 10px;
-  height: 300px;
-}
-.column_2 {
-  float: left;
-  width: 58%;
-  padding: 10px;
-  height: 300px;
-}
-.column_3 {
-  float: left;
-  width: 30%;
-  padding: 10px;
-  height: 300px;
-  text-align: center;
-}*/
 
 /* A felső sor elrendezése */
 .header-row {
@@ -166,21 +137,7 @@ body {
     background: rgba(255, 255, 255, 0.3);
     transform: translateY(-2px);
 }
-/*.plusBTN {
-  height: 80px;
-  line-height: 80px;
-  width: 80px;
-  font-size: xx-large;
-  font-weight: bolder;
-  border-radius: 50%;
-  border: none;
-  color: white;
-  text-align: center;
-  cursor: pointer;
-  display: inline-block;
-  background: linear-gradient(to right, #c42727, #f95656);
-  box-shadow: 0 0 10px #f8a1a1;
-}*/
+
 .modal {
   display: none;
   position: fixed;
@@ -308,6 +265,7 @@ body {
   display: flex;
   align-items: center;
   font-size: 0.8em;
+  margin-top: 15px;
 }
 .tag-delete {
   margin-left: 5px;
