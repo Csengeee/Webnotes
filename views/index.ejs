@@ -321,7 +321,7 @@
       allTags.forEach(tag => {
           const tagElement = document.createElement('div');
           tagElement.className = 'global-tag';
-          tagElement.textContent = '#' + tag;
+          tagElement.textContent = tag;
           tagElement.onclick = () => {
             const sInput = document.getElementById('searchInput');
             sInput.value = tag;
