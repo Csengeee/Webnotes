@@ -1,8 +1,9 @@
 const { connectDB, getConnection } = require("../config/db"); 
 const sanitizer = require('../modules/inputSanitizer');
 
-// Segédfüggvény a jegyzetek egységes lekéréséhez
 const getNotesByUserId = async (userId) => {
+  // SQL lekérdezés: Összekapcsolja a 'note', 'note_tag' és 'tag' táblákat
+  // A GROUP_CONCAT egybefűzi a címkéket egy stringbe '||' elválasztóval
   const query = `
     SELECT n.id, n.title, n.content, n.creation_date, n.modification_date,
     GROUP_CONCAT(t.name SEPARATOR '||') AS tags
@@ -16,6 +17,7 @@ const getNotesByUserId = async (userId) => {
   const [err, result] = await connectDB(query, [userId]);
   if (err) throw err;
   
+  // Az adatbázisból jövő nyers adatokat "szép", a frontend számára emészthető objektumokká alakítja
   return result.map(note => ({
     id: note.id,
     title: note.title,
@@ -27,26 +29,23 @@ const getNotesByUserId = async (userId) => {
 };
 
 const save = async (req, res, next) => {
-  const { notes } = req.body;
+  const { notes } = req.body; // A kliensről érkező jegyzetek tömbje
   const user = req.session.user;
 
-  if (!user || !user.id) {
-    return res.status(401).json({ status: "error", message: "Unauthorized" });
-  }
+  // Jogosultság és alapvető adatok ellenőrzése
+  if (!user || !user.id) return res.status(401).json({ status: "error", message: "Unauthorized" });
+  if (!Array.isArray(notes) || notes.length === 0) return res.status(400).json({ status: "error", message: "Notes are required" });
 
-  if (!Array.isArray(notes) || notes.length === 0) {
-    return res.status(400).json({ status: "error", message: "Notes are required" });
-  }
-
-  const connection = await getConnection();
+  const connection = await getConnection(); // Egyedi kapcsolat kérése a tranzakcióhoz
   
   try {
-    // Tranzakció indítása a biztonságos mentéshez
+    // TRANZAKCIÓ INDÍTÁSA: Innentől a módosítások csak "ideiglenesek" a commit-ig
     await new Promise((resolve, reject) => {
       connection.beginTransaction(err => err ? reject(err) : resolve());
     });
 
     for (const rawNote of notes) {
+      // 1. ADATOK TISZTÍTÁSA
       const title = sanitizer.sanitizeText(rawNote.title || '', sanitizer.MAX_TITLE_LENGTH);
       const content = sanitizer.sanitizeText(rawNote.content || '', sanitizer.MAX_CONTENT_LENGTH);
       const tags = sanitizer.sanitizeTags(rawNote.tags || []);
@@ -54,7 +53,7 @@ const save = async (req, res, next) => {
       let noteId = rawNote.id;
 
       if (noteId) {
-        // 1. Jegyzet frissítése (mindig ellenőrizzük a user_id-t!)
+        // MÁR LÉTEZŐ JEGYZET: Frissítés (UPDATE)
         const updateQuery = 'UPDATE note SET title = ?, content = ?, modification_date = ? WHERE id = ? AND user_id = ?';
         await new Promise((resolve, reject) => {
           connection.query(updateQuery, [title, content, new Date(), noteId, user.id], (err, res) => {
@@ -63,29 +62,29 @@ const save = async (req, res, next) => {
           });
         });
         
-        // 2. KRITIKUS JAVÍTÁS: Régi címkekapcsolatok törlése az újrakötés előtt
+        // CÍMKÉK RESETELÉSE: Töröljük a régi kapcsolatait, hogy tiszta lappal újraírhassuk
         await new Promise((resolve, reject) => {
           connection.query('DELETE FROM note_tag WHERE note_id = ?', [noteId], err => err ? reject(err) : resolve());
         });
       } else {
-        // Új jegyzet beszúrása
+        // ÚJ JEGYZET: Beszúrás (INSERT)
         const insertQuery = 'INSERT INTO note (user_id, title, content, creation_date, modification_date) VALUES (?, ?, ?, ?, ?)';
         noteId = await new Promise((resolve, reject) => {
           connection.query(insertQuery, [user.id, title, content, new Date(), new Date()], (err, res) => {
             if (err) reject(err);
-            else resolve(res.insertId);
+            else resolve(res.insertId); // Elmentjük az újonnan generált ID-t
           });
         });
       }
 
-      // 3. Címkék feldolgozása és újrakötése
+      // 2. CÍMKÉK ÚJRAKÖTÉSE (Many-to-Many kezelés)
       for (const tagName of tags) {
-        // Biztosítjuk, hogy a címke létezik a tag táblában
+        // INSERT IGNORE: Ha a címke már létezik a 'tag' táblában, nem csinál semmit, nincs hiba
         await new Promise((resolve, reject) => {
           connection.query('INSERT IGNORE INTO tag (name) VALUES (?)', [tagName], err => err ? reject(err) : resolve());
         });
         
-        // Lekérjük a címke ID-ját
+        // Megkeressük az (új vagy régi) címke ID-ját
         const tagId = await new Promise((resolve, reject) => {
           connection.query('SELECT id FROM tag WHERE name = ?', [tagName], (err, res) => {
             if (err || res.length === 0) reject(err || new Error('Tag error'));
@@ -93,31 +92,32 @@ const save = async (req, res, next) => {
           });
         });
 
-        // Új kapcsolat létrehozása a jegyzet és a címke között
+        // Összekötjük a jegyzetet a címkével a kapcsolótáblában
         await new Promise((resolve, reject) => {
           connection.query('INSERT INTO note_tag (note_id, tag_id) VALUES (?, ?)', [noteId, tagId], err => err ? reject(err) : resolve());
         });
       }
     }
 
-    // Tranzakció véglegesítése
+    // HA MINDEN SIKERÜLT: Véglegesítjük a tranzakciót az adatbázisban
     await new Promise((resolve, reject) => {
       connection.commit(err => err ? reject(err) : resolve());
     });
 
-    // Frissített lista lekérése és visszaküldése
+    // Visszaküldjük a friss listát
     const updatedNotes = await getNotesByUserId(user.id);
     res.status(200).json({ status: 'success', notes: updatedNotes });
 
   } catch (error) {
-    // Hiba esetén minden módosítás visszagörgetése
+    // HIBA ESETÉN: Visszavonunk minden eddigi módosítást a ciklusból (ROLLBACK)
     await new Promise(resolve => connection.rollback(() => resolve()));
     next(error); 
   } finally {
-    connection.release(); // Kapcsolat felszabadítása
+    connection.release(); // Fontos: a kapcsolatot visszaadjuk a pool-ba
   }
 };
 
+// LISTÁZÁS: Egyszerűen meghívja a segédfüggvényt
 const list = async (req, res, next) => {
   const user = req.session.user;
   if (!user || !user.id) return res.status(401).json({ status: "error", message: "Unauthorized" });
@@ -130,27 +130,21 @@ const list = async (req, res, next) => {
   }
 };
 
+// TÖRLÉS: Két lépcsős folyamat
 const remove = async (req, res) => {
   const { id } = req.body;
   const user = req.session.user;
 
-  if (!user || !user.id) {
-    return res.status(401).json({ status: "error", message: "Unauthorized" });
-  }
-
-  if (!id) {
-    return res.status(400).json({ status: "error", message: "Note id is required" });
-  }
+  // ... ellenőrzések ...
 
   try {
-    // Kapcsolatok törlése a kapcsolótáblából
+    // 1. Először a kapcsolótáblából töröljük a címke-kapcsolatokat (idegen kulcs kényszer miatt)
     await connectDB('DELETE FROM note_tag WHERE note_id = ?', [id]);
 
-    // Jegyzet törlése (ellenőrizve a tulajdonost)
+    // 2. Töröljük magát a jegyzetet, de csak ha a bejelentkezett felhasználóé
     const [err, result] = await connectDB('DELETE FROM note WHERE id = ? AND user_id = ?', [id, user.id]);
 
     if (err) throw err;
-
     if (!result || result.affectedRows === 0) {
       return res.status(404).json({ status: "error", message: "Note not found or not permitted" });
     }
